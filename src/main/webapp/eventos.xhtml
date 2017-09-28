@@ -115,9 +115,13 @@
                             <h:outputText value="#{evento.eventopai.nome}" />
                         </p:column>
                     </p:dataTable>
-                    <h:commandLink id="pdf">
+                    <h:commandLink id="xls">
                         <p:graphicImage value="#{resource['images/xls.png']}" style="width: 35px; height: 46px"/>
                         <p:dataExporter type="xls" target="tbl" fileName="eventos" encoding="UTF-8" />
+                    </h:commandLink>
+                    <h:commandLink id="pdf">
+                        <p:graphicImage value="#{resource['images/pdf.png']}" style="width: 45px; height: 46px"/>
+                        <p:dataExporter type="pdf" target="tbl" fileName="eventos" encoding="UTF-8" />
                     </h:commandLink>
 
                     <p:dialog widgetVar="dialogEvento" header="Cadastrar Evento" showEffect="clip" hideEffect="clip" resizable="false">
