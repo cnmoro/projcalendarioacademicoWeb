@@ -4,6 +4,7 @@ import calendarioacademico.commons.Evento;
 import calendarioacademico.utils.EManager;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -12,6 +13,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import org.primefaces.event.FileUploadEvent;
 import org.apache.commons.io.IOUtils;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleEvent;
@@ -26,6 +28,7 @@ import org.primefaces.model.ScheduleModel;
 public class CalendarioManager implements Serializable {
 
     private Evento novoEvento = new Evento();
+    private Evento eventoSelecionado = new Evento();
 
     private List<Evento> eventos;
     private byte[] fileContent;
@@ -37,9 +40,13 @@ public class CalendarioManager implements Serializable {
 
     @PostConstruct
     public void init() {
-        this.eventos = EManager.getInstance().createNamedQuery("Evento.findAll").getResultList();
         eventModel = new DefaultScheduleModel();
-        
+        atualizaEventos();
+    }
+
+    public void atualizaEventos() {
+        this.eventos = EManager.getInstance().createNamedQuery("Evento.findAll").getResultList();
+        eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
         }
@@ -50,6 +57,7 @@ public class CalendarioManager implements Serializable {
             this.fileContent = IOUtils.toByteArray(event.getFile().getInputstream());
             if (this.fileContent.length > 0) {
                 this.novoEvento.setDocumento(this.fileContent);
+                this.eventoSelecionado.setDocumento(this.fileContent);
                 popupMessageDocumentoUpload();
             }
         } catch (IOException e) {
@@ -57,16 +65,45 @@ public class CalendarioManager implements Serializable {
         }
     }
 
+    public void onEventSelect(SelectEvent selectEvent) {
+        ScheduleEvent event = (ScheduleEvent) selectEvent.getObject();
+        this.eventoSelecionado = (Evento) event.getData();
+    }
+
+    public void onDateSelect(SelectEvent selectEvent) {
+        event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
+        this.novoEvento.setDatainicio(event.getStartDate());
+        this.novoEvento.setDatafim(event.getEndDate());
+    }
+
     public void addEvento() {
         this.novoEvento.setAutor("admin"); //Modificar apos construcao de opcao de login
-//        Map<String, Double> coords;
-//        coords = OpenStreetMapUtils.getInstance().getCoordinates(this.novoEvento.getEndereco());
-//        this.novoEvento.setLat(coords.get("lat"));
-//        this.novoEvento.setLon(coords.get("lon"));
+        //add geocoder
         EManager.getInstance().getTransaction().begin();
         EManager.getInstance().persist(this.novoEvento);
         EManager.getInstance().getTransaction().commit();
         this.novoEvento = new Evento();
+        popupMessageCadastrado();
+        atualizaEventos();
+    }
+
+    public void modificaEvento() {
+        this.eventoSelecionado.setAutor("admin");
+        EManager.getInstance().getTransaction().begin();
+        EManager.getInstance().merge(this.eventoSelecionado);
+        EManager.getInstance().getTransaction().commit();
+        this.eventoSelecionado = new Evento();
+        popupMessageModificado();
+        atualizaEventos();
+    }
+
+    public void excluiEvento() {
+        EManager.getInstance().getTransaction().begin();
+        EManager.getInstance().remove(this.eventoSelecionado);
+        EManager.getInstance().getTransaction().commit();
+        this.eventoSelecionado = new Evento();
+        popupMessageExcluido();
+        atualizaEventos();
     }
 
     public void addMessage(String summary, String detail) {
@@ -76,6 +113,18 @@ public class CalendarioManager implements Serializable {
 
     public void popupMessageDocumentoUpload() {
         addMessage("Sucesso", "Documento carregado.");
+    }
+
+    public void popupMessageCadastrado() {
+        addMessage("Sucesso", "Evento cadastrado.");
+    }
+
+    public void popupMessageExcluido() {
+        addMessage("Sucesso", "Evento excluído.");
+    }
+
+    public void popupMessageModificado() {
+        addMessage("Sucesso", "Evento modificado.");
     }
 
     public Evento getNovoEvento() {
@@ -126,4 +175,11 @@ public class CalendarioManager implements Serializable {
         this.permiteAdicionar = permiteAdicionar;
     }
 
+    public Evento getEventoSelecionado() {
+        return eventoSelecionado;
+    }
+
+    public void setEventoSelecionado(Evento eventoSelecionado) {
+        this.eventoSelecionado = eventoSelecionado;
+    }
 }

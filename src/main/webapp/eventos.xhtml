@@ -25,10 +25,11 @@
                     <p:growl id="mensagens" showDetail="true" />
 
                     <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1000px" timeFormat="HH:mm">
-                        <p:ajax event="dateSelect" update="detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
+                        <p:ajax event="dateSelect" listener="#{calendarioManager.onDateSelect}" update=":form-calendario:detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
+                        <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica" oncomplete="PF('dialogEventoModifica').show();" />
                     </p:schedule>
 
-                    <p:dialog widgetVar="dialogEvento" header="Evento" showEffect="clip" hideEffect="clip">
+                    <p:dialog widgetVar="dialogEvento" header="Cadastrar Evento" showEffect="clip" hideEffect="clip" resizable="false">
                         <h:panelGrid id="detalhesEvento" columns="2">
                             <p:outputLabel value="Nome" />
                             <p:inputText value="#{calendarioManager.novoEvento.nome}" />
@@ -62,11 +63,52 @@
                             <p:outputLabel value="Enviar arquivo do projeto" />
                             <h:form id="form-upload" enctype="multipart/form-data">
                                 <h:outputText value="Selecione um arquivo PDF e clique em Enviar."/>
+                                <p:fileUpload fileUploadListener="#{calendarioManager.handleFileUpload}" uploadLabel="Enviar" label="Selecione" update=":form-calendario:mensagens" cancelLabel="Cancelar" mode="advanced" allowTypes="/(\.|\/)(pdf)$/" />
+                            </h:form>
+
+                            <p:commandButton id="btAdd" value="Adicionar" actionListener="#{calendarioManager.addEvento()}" update=":form-calendario:calendario, :form-calendario:mensagens" oncomplete="PF('dialogEvento').hide();" />
+                        </h:panelGrid>
+                    </p:dialog> 
+                    
+                    <p:dialog widgetVar="dialogEventoModifica" header="Modificar/Excluir Evento" showEffect="clip" hideEffect="clip" resizable="false">
+                        <h:panelGrid id="detalhesEventoModifica" columns="2">
+                            <p:outputLabel value="Nome" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.nome}" />
+
+                            <p:outputLabel value="Horas Complementares" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.horas}" />
+
+                            <p:outputLabel value="Semana Acadêmica?" />
+                            <p:selectBooleanCheckbox value="#{calendarioManager.eventoSelecionado.semanaacademica}" />
+
+                            <p:outputLabel value="Endereço" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.endereco}" />
+
+                            <p:outputLabel value="Data Início:" />
+                            <p:calendar value="#{calendarioManager.eventoSelecionado.datainicio}" pattern="MM/dd/yyyy HH:mm" />
+
+                            <p:outputLabel value="Data Fim:" />
+                            <p:calendar value="#{calendarioManager.eventoSelecionado.datafim}" pattern="MM/dd/yyyy HH:mm" />
+
+                            <p:outputLabel value="É Sub-evento de:"/>
+                            <p:selectOneMenu value="#{calendarioManager.eventoSelecionado.eventopai}" converter="eventoConverter" panelStyle="width:180px"
+                                             effect="fade" var="e" style="width:60px" filter="true" filterMatchMode="startsWith">
+                                <f:selectItem itemLabel="Nenhum" itemValue="" />
+                                <f:selectItems value="#{calendarioManager.eventos}" var="evento" itemLabel="#{evento.nome}" itemValue="#{evento}" />
+
+                                <p:column style="width:10%">
+                                    <h:outputText value="#{e.nome}" />
+                                </p:column>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Enviar arquivo do projeto" />
+                            <h:form id="form-upload-modifica" enctype="multipart/form-data">
+                                <h:outputText value="Selecione um arquivo PDF e clique em Enviar."/>
                                 <p:fileUpload fileUploadListener="#{calendarioManager.handleFileUpload}" update=":form-calendario:mensagens" uploadLabel="Enviar" label="Selecione" cancelLabel="Cancelar" mode="advanced" allowTypes="/(\.|\/)(pdf)$/" />
                             </h:form>
 
-                            <p:commandButton type="reset" value="Reset" />
-                            <p:commandButton id="btAdd" value="Adicionar" actionListener="#{calendarioManager.addEvento()}" oncomplete="PF('calendario-widget').update();PF('dialogEvento').hide();" />
+                            <p:commandButton id="btModifica" value="Modificar" actionListener="#{calendarioManager.modificaEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens" />
+                            <p:commandButton id="btExclui" value="Excluir" actionListener="#{calendarioManager.excluiEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens"/>
                         </h:panelGrid>
                     </p:dialog> 
                 </h:form>
