@@ -29,6 +29,97 @@
                         <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica, :form-calendario:gmap" oncomplete="PF('dialogEventoModifica').show();" />
                     </p:schedule>
 
+                    <br/>
+                    <p:dataTable var="evento" id="tbl" value="#{calendarioManager.eventos}" paginator="true" rows="100" style="display: none" tableStyle="width:auto; text-align:center; font-size:12px;">
+                        <p:column style="width: 100px" exportable="false">
+                            <f:facet name="header">
+                                <h:outputText value="Id" />
+                            </f:facet>
+                            <h:outputText value="#{evento.id}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Nome" />
+                            </f:facet>
+                            <h:outputText value="#{evento.nome}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Horas Complementares" />
+                            </f:facet>
+                            <h:outputText value="#{evento.horas}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Evento da Semana Acadêmica?" />
+                            </f:facet>
+                            <h:outputText value="#{evento.semanaacademicastring}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Autor" />
+                            </f:facet>
+                            <h:outputText value="#{evento.autor}" />
+                        </p:column>
+
+                        <p:column style="width: 100px" exportable="false">
+                            <f:facet name="header">
+                                <h:outputText value="Latitude" />
+                            </f:facet>
+                            <h:outputText value="#{evento.lat}" />
+                        </p:column>
+
+                        <p:column style="width: 100px" exportable="false">
+                            <f:facet name="header">
+                                <h:outputText value="Longitude" />
+                            </f:facet>
+                            <h:outputText value="#{evento.lon}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Endereço" />
+                            </f:facet>
+                            <h:outputText value="#{evento.endereco}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Data de Início" />
+                            </f:facet>
+                            <h:outputText value="#{evento.datainicio}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Data de Encerramento" />
+                            </f:facet>
+                            <h:outputText value="#{evento.datafim}" />
+                        </p:column>
+
+                        <p:column style="width: 100px" exportable="false" rendered="false">
+                            <f:facet name="header">
+                                <h:outputText value="Documento" />
+                            </f:facet>
+                            <h:outputText value="#{evento.documento}" />
+                        </p:column>
+
+                        <p:column style="width: 100px">
+                            <f:facet name="header">
+                                <h:outputText value="Sub-evento de" />
+                            </f:facet>
+                            <h:outputText value="#{evento.eventopai.nome}" />
+                        </p:column>
+                    </p:dataTable>
+                    <h:commandLink id="pdf">
+                        <p:graphicImage value="#{resource['images/xls.png']}" style="width: 35px; height: 46px"/>
+                        <p:dataExporter type="xls" target="tbl" fileName="eventos" encoding="UTF-8" />
+                    </h:commandLink>
+
                     <p:dialog widgetVar="dialogEvento" header="Cadastrar Evento" showEffect="clip" hideEffect="clip" resizable="false">
                         <h:panelGrid id="detalhesEvento" columns="2">
                             <p:outputLabel value="Nome" />

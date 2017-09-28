@@ -151,6 +151,13 @@ public class Evento implements Serializable {
     public void setSemanaacademica(boolean semanaacademica) {
         this.semanaacademica = semanaacademica;
     }
+    
+    public String getSemanaacademicastring() {
+        if (semanaacademica)
+            return "Sim";
+        else
+            return "Não";
+    }
 
     public String getAutor() {
         return autor;
