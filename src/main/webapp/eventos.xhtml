@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <style type="text/css">
+        #container {
+            height:auto;
+            min-height:30px;
+            height:auto !important;
+            height:30px;  
+        }
+        #center {
+            line-height: 30px;
+        }
+    </style>
+
+    <body>
+        <ui:composition template="./template.xhtml">
+            <ui:define name="content">
+                <h:form id="form-calendario">
+                    <p:growl id="mensagens" showDetail="true" />
+
+                    <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1000px" timeFormat="HH:mm">
+                        <p:ajax event="dateSelect" update="detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
+                    </p:schedule>
+
+                    <p:dialog widgetVar="dialogEvento" header="Evento" showEffect="clip" hideEffect="clip">
+                        <h:panelGrid id="detalhesEvento" columns="2">
+                            <p:outputLabel value="Nome" />
+                            <p:inputText value="#{calendarioManager.novoEvento.nome}" />
+
+                            <p:outputLabel value="Horas Complementares" />
+                            <p:inputText value="#{calendarioManager.novoEvento.horas}" />
+
+                            <p:outputLabel value="Semana Acadêmica?" />
+                            <p:selectBooleanCheckbox value="#{calendarioManager.novoEvento.semanaacademica}" />
+
+                            <p:outputLabel value="Endereço" />
+                            <p:inputText value="#{calendarioManager.novoEvento.endereco}" />
+
+                            <p:outputLabel value="Data Início:" />
+                            <p:calendar value="#{calendarioManager.novoEvento.datainicio}" pattern="MM/dd/yyyy HH:mm" />
+
+                            <p:outputLabel value="Data Fim:" />
+                            <p:calendar value="#{calendarioManager.novoEvento.datafim}" pattern="MM/dd/yyyy HH:mm" />
+
+                            <p:outputLabel value="É Sub-evento de:"/>
+                            <p:selectOneMenu value="#{calendarioManager.novoEvento.eventopai}" converter="eventoConverter" panelStyle="width:180px"
+                                             effect="fade" var="e" style="width:60px" filter="true" filterMatchMode="startsWith">
+                                <f:selectItem itemLabel="Nenhum" itemValue="" />
+                                <f:selectItems value="#{calendarioManager.eventos}" var="evento" itemLabel="#{evento.nome}" itemValue="#{evento}" />
+
+                                <p:column style="width:10%">
+                                    <h:outputText value="#{e.nome}" />
+                                </p:column>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Enviar arquivo do projeto" />
+                            <h:form id="form-upload" enctype="multipart/form-data">
+                                <h:outputText value="Selecione um arquivo PDF e clique em Enviar."/>
+                                <p:fileUpload fileUploadListener="#{calendarioManager.handleFileUpload}" update=":form-calendario:mensagens" uploadLabel="Enviar" label="Selecione" cancelLabel="Cancelar" mode="advanced" allowTypes="/(\.|\/)(pdf)$/" />
+                            </h:form>
+
+                            <p:commandButton type="reset" value="Reset" />
+                            <p:commandButton id="btAdd" value="Adicionar" actionListener="#{calendarioManager.addEvento()}" oncomplete="PF('calendario-widget').update();PF('dialogEvento').hide();" />
+                        </h:panelGrid>
+                    </p:dialog> 
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
