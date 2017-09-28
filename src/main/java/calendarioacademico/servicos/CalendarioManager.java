@@ -18,6 +18,10 @@ import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
 
 /**
  *
@@ -26,6 +30,8 @@ import org.primefaces.model.ScheduleModel;
 @ManagedBean
 @ViewScoped
 public class CalendarioManager implements Serializable {
+
+    public final static long DUAS_HORAS = 2 * 60 * 60 * 1000L;
 
     private Evento novoEvento = new Evento();
     private Evento eventoSelecionado = new Evento();
@@ -36,17 +42,22 @@ public class CalendarioManager implements Serializable {
     private ScheduleModel eventModel;
     private ScheduleEvent event = new DefaultScheduleEvent();
 
+    private MapModel mapModel;
+
     private boolean permiteAdicionar = true;
+
+    private String mapBounds = "-25.4322517, -49.2672195";
 
     @PostConstruct
     public void init() {
-        eventModel = new DefaultScheduleModel();
+        this.eventModel = new DefaultScheduleModel();
+        this.mapModel = new DefaultMapModel();
         atualizaEventos();
     }
 
     public void atualizaEventos() {
         this.eventos = EManager.getInstance().createNamedQuery("Evento.findAll").getResultList();
-        eventModel.clear();
+        this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
         }
@@ -66,8 +77,15 @@ public class CalendarioManager implements Serializable {
     }
 
     public void onEventSelect(SelectEvent selectEvent) {
+        this.mapModel.getMarkers().clear();
+        this.mapBounds = "-25.4322517, -49.2672195";
         ScheduleEvent event = (ScheduleEvent) selectEvent.getObject();
         this.eventoSelecionado = (Evento) event.getData();
+        if (this.eventoSelecionado.getLat() != null && this.eventoSelecionado.getLon() != null) {
+            LatLng coordenada = new LatLng(this.eventoSelecionado.getLat(), this.eventoSelecionado.getLon());
+            this.mapModel.addOverlay(new Marker(coordenada, this.eventoSelecionado.getNome()));
+            this.mapBounds = coordenada.getLat() + ", " + coordenada.getLng();
+        }
     }
 
     public void onDateSelect(SelectEvent selectEvent) {
@@ -88,13 +106,18 @@ public class CalendarioManager implements Serializable {
     }
 
     public void modificaEvento() {
-        this.eventoSelecionado.setAutor("admin");
-        EManager.getInstance().getTransaction().begin();
-        EManager.getInstance().merge(this.eventoSelecionado);
-        EManager.getInstance().getTransaction().commit();
-        this.eventoSelecionado = new Evento();
-        popupMessageModificado();
-        atualizaEventos();
+        Date horaAtual = new Date();
+        if (Math.abs(horaAtual.getTime() - this.eventoSelecionado.getDatafim().getTime()) < DUAS_HORAS) {
+            popupMessageDuasHoras();
+        } else {
+            this.eventoSelecionado.setAutor("admin");
+            EManager.getInstance().getTransaction().begin();
+            EManager.getInstance().merge(this.eventoSelecionado);
+            EManager.getInstance().getTransaction().commit();
+            this.eventoSelecionado = new Evento();
+            popupMessageModificado();
+            atualizaEventos();
+        }
     }
 
     public void excluiEvento() {
@@ -117,6 +140,10 @@ public class CalendarioManager implements Serializable {
 
     public void popupMessageCadastrado() {
         addMessage("Sucesso", "Evento cadastrado.");
+    }
+
+    public void popupMessageDuasHoras() {
+        addMessage("Erro", "Evento muito próximo para ser alterado.");
     }
 
     public void popupMessageExcluido() {
@@ -182,4 +209,21 @@ public class CalendarioManager implements Serializable {
     public void setEventoSelecionado(Evento eventoSelecionado) {
         this.eventoSelecionado = eventoSelecionado;
     }
+
+    public MapModel getMapModel() {
+        return mapModel;
+    }
+
+    public void setMapModel(MapModel mapModel) {
+        this.mapModel = mapModel;
+    }
+
+    public String getMapBounds() {
+        return mapBounds;
+    }
+
+    public void setMapBounds(String mapBounds) {
+        this.mapBounds = mapBounds;
+    }
+
 }

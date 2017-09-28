@@ -24,9 +24,9 @@
                 <h:form id="form-calendario">
                     <p:growl id="mensagens" showDetail="true" />
 
-                    <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1000px" timeFormat="HH:mm">
+                    <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1000px" timeFormat="HH:mm" draggable="false">
                         <p:ajax event="dateSelect" listener="#{calendarioManager.onDateSelect}" update=":form-calendario:detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
-                        <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica" oncomplete="PF('dialogEventoModifica').show();" />
+                        <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica, :form-calendario:gmap" oncomplete="PF('dialogEventoModifica').show();" />
                     </p:schedule>
 
                     <p:dialog widgetVar="dialogEvento" header="Cadastrar Evento" showEffect="clip" hideEffect="clip" resizable="false">
@@ -69,7 +69,7 @@
                             <p:commandButton id="btAdd" value="Adicionar" actionListener="#{calendarioManager.addEvento()}" update=":form-calendario:calendario, :form-calendario:mensagens" oncomplete="PF('dialogEvento').hide();" />
                         </h:panelGrid>
                     </p:dialog> 
-                    
+
                     <p:dialog widgetVar="dialogEventoModifica" header="Modificar/Excluir Evento" showEffect="clip" hideEffect="clip" resizable="false">
                         <h:panelGrid id="detalhesEventoModifica" columns="2">
                             <p:outputLabel value="Nome" />
@@ -106,10 +106,15 @@
                                 <h:outputText value="Selecione um arquivo PDF e clique em Enviar."/>
                                 <p:fileUpload fileUploadListener="#{calendarioManager.handleFileUpload}" update=":form-calendario:mensagens" uploadLabel="Enviar" label="Selecione" cancelLabel="Cancelar" mode="advanced" allowTypes="/(\.|\/)(pdf)$/" />
                             </h:form>
-
-                            <p:commandButton id="btModifica" value="Modificar" actionListener="#{calendarioManager.modificaEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens" />
-                            <p:commandButton id="btExclui" value="Excluir" actionListener="#{calendarioManager.excluiEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens"/>
                         </h:panelGrid>
+                        <br/>
+                        <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDIIV4YVva0Fx9HC5G5IB-4ydNZF-zusYs"></script>
+                        <p:gmap id="gmap" center="#{calendarioManager.mapBounds}" zoom="7"  type="MAP" 
+                                model="#{calendarioManager.mapModel}" style="width:100%;height:300px" widgetVar="map">
+                        </p:gmap>
+                        <br/>
+                        <p:commandButton id="btModifica" value="Modificar" actionListener="#{calendarioManager.modificaEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens" />
+                        <p:commandButton id="btExclui" value="Excluir" actionListener="#{calendarioManager.excluiEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens"/>
                     </p:dialog> 
                 </h:form>
             </ui:define>
