@@ -27,6 +27,12 @@ public class LoginBean implements Serializable {
     private String recuperaUsuario;
     private String recuperaEmail;
     private static String nivelAcesso = "";
+    private Usuario novoUsuario = new Usuario();
+    private Usuario usuarioRecuperaCodigo = new Usuario();
+    private String loginRecuperaCodigo = "";
+    private String emailRecuperaCodigo = "";
+    private String codigorecuperacao = "";
+    private String novaSenhaRecuperaCodigo = "";
 
     private boolean loggedIn;
 
@@ -47,6 +53,24 @@ public class LoginBean implements Serializable {
         }
         popupMessage_DadosIncorretos();
         return navigationBean.toLogin();
+    }
+
+    public void doCadastro() {
+        try {
+            this.novoUsuario.setNivelacesso("Usuário");
+            if (this.novoUsuario.getLogin().equalsIgnoreCase("") || this.novoUsuario.getLogin().length() < 4 || this.novoUsuario.getSenha().length() < 6 || this.novoUsuario.getEmail().length() < 6) {
+                popupMessage_DadosIncorretos();
+            } else {
+                this.novoUsuario.setSenha(MD5Util.md5Hash(this.novoUsuario.getSenha()));
+                EManager.getInstance().getTransaction().begin();
+                EManager.getInstance().persist(this.novoUsuario);
+                EManager.getInstance().getTransaction().commit();
+                popupMessage_CadastroSucesso();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.novoUsuario = new Usuario();
     }
 
     public String doLogout() throws IOException {
@@ -70,7 +94,7 @@ public class LoginBean implements Serializable {
         if (u != null) {
             String uuid = UUID.randomUUID().toString();
             sendMail(this.recuperaEmail, uuid);
-            u.setSenha(MD5Util.md5Hash(uuid));
+            u.setCodigorecuperacao(null);
             EManager.getInstance().getTransaction().begin();
             EManager.getInstance().merge(u);
             EManager.getInstance().getTransaction().commit();
@@ -81,15 +105,30 @@ public class LoginBean implements Serializable {
         this.recuperaUsuario = "";
     }
 
+    public void doRecoverCodigo() {
+        Usuario recoverUser = new Usuario();
+        recoverUser = (Usuario) EManager.getInstance().createNamedQuery("Usuario.findByLoginEmailCodigo").setParameter("login", this.loginRecuperaCodigo).setParameter("email", this.emailRecuperaCodigo).setParameter("codigorecuperacao", this.codigorecuperacao).getSingleResult();
+        if (recoverUser.getId() != null) {
+            recoverUser.setSenha(MD5Util.md5Hash(this.novaSenhaRecuperaCodigo));
+            recoverUser.setCodigorecuperacao("");
+            EManager.getInstance().getTransaction().begin();
+            EManager.getInstance().merge(recoverUser);
+            EManager.getInstance().getTransaction().commit();
+            popupMessage_ResetSenhaSucesso();
+        } else {
+            popupMessage_DadosIncorretos();
+        }
+    }
+
     private void sendMail(String destino, String uuid) throws EmailException {
         Email email = new SimpleEmail();
         email.setHostName("smtp.gmail.com");
         email.setSmtpPort(587);
-        email.setAuthenticator(new DefaultAuthenticator("laptiutfpr@gmail.com", "*lapti@utfpr&2017*"));
+        email.setAuthenticator(new DefaultAuthenticator("calendarioeventosbsi@gmail.com", "disciplinabsi"));
         email.setTLS(true);
-        email.setFrom("laptiutfpr@gmail.com");
-        email.setSubject("Bombeiros - Recuperação de Senha");
-        email.setMsg("Sua nova senha é: " + uuid);
+        email.setFrom("calendarioeventosbsi@gmail.com");
+        email.setSubject("Calendário de Eventos - Recuperação de senha");
+        email.setMsg("Seu código é: " + uuid);
         email.addTo(destino);
         email.send();
         popupMessage_EmailEnviado();
@@ -104,8 +143,16 @@ public class LoginBean implements Serializable {
         addMessage("Erro", "Dados faltantes ou incorretos.");
     }
 
+    public void popupMessage_CadastroSucesso() {
+        addMessage("Sucesso", "Cadastro concluído.");
+    }
+
     public void popupMessage_EmailEnviado() {
         addMessage("Recuperação", "Uma nova senha foi enviada para o e-mail cadastrado.");
+    }
+
+    public void popupMessage_ResetSenhaSucesso() {
+        addMessage("Recuperação", "Login atualizado com sucesso.");
     }
 
     public static String getUsernameStatic() {
@@ -163,4 +210,53 @@ public class LoginBean implements Serializable {
     public void setRecuperaEmail(String recuperaEmail) {
         this.recuperaEmail = recuperaEmail;
     }
+
+    public Usuario getNovoUsuario() {
+        return novoUsuario;
+    }
+
+    public void setNovoUsuario(Usuario novoUsuario) {
+        this.novoUsuario = novoUsuario;
+    }
+
+    public Usuario getUsuarioRecuperaCodigo() {
+        return usuarioRecuperaCodigo;
+    }
+
+    public void setUsuarioRecuperaCodigo(Usuario usuarioRecuperaCodigo) {
+        this.usuarioRecuperaCodigo = usuarioRecuperaCodigo;
+    }
+
+    public String getLoginRecuperaCodigo() {
+        return loginRecuperaCodigo;
+    }
+
+    public void setLoginRecuperaCodigo(String loginRecuperaCodigo) {
+        this.loginRecuperaCodigo = loginRecuperaCodigo;
+    }
+
+    public String getEmailRecuperaCodigo() {
+        return emailRecuperaCodigo;
+    }
+
+    public void setEmailRecuperaCodigo(String emailRecuperaCodigo) {
+        this.emailRecuperaCodigo = emailRecuperaCodigo;
+    }
+
+    public String getCodigorecuperacao() {
+        return codigorecuperacao;
+    }
+
+    public void setCodigorecuperacao(String codigorecuperacao) {
+        this.codigorecuperacao = codigorecuperacao;
+    }
+
+    public String getNovaSenhaRecuperaCodigo() {
+        return novaSenhaRecuperaCodigo;
+    }
+
+    public void setNovaSenhaRecuperaCodigo(String novaSenhaRecuperaCodigo) {
+        this.novaSenhaRecuperaCodigo = novaSenhaRecuperaCodigo;
+    }
+
 }

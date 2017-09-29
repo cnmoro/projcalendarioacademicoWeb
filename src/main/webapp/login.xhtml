@@ -34,6 +34,7 @@
                 <span class="highlight"></span><span class="bar"></span>
             </div>
             <p:commandButton id="button" class="button buttonRed" value="Entrar" action="#{loginBean.doLogin}" update="message"/>
+            <p:commandButton id="cadastrar" class="button buttonRed" value="Cadastrar" update=":form-novo:cadastro-dialog" oncomplete="PF('cadastro_widget').show()"/>
             <p:commandButton id="recsenha" class="button buttonRed" value="Recuperar Senha" update=":reset-form:recupera-senha-dialog" oncomplete="PF('recupera_senha_widget').show()"/>
         </h:form>
 
@@ -42,14 +43,43 @@
             <p:dialog header="Recuperação de Senha" widgetVar="recupera_senha_widget" id="recupera-senha-dialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closeOnEscape="true" class="reset-form">
                 <div class="group">
                     <p:inputText size="20" maxlength="200" value="#{loginBean.recuperaUsuario}" class="input" pt:placeholder="Usuário" />
-<!--                    <span class="highlight"></span><span class="bar"></span>-->
+                    <!--                    <span class="highlight"></span><span class="bar"></span>-->
                 </div>
                 <div class="group">
                     <p:inputText size="20" maxlength="200" value="#{loginBean.recuperaEmail}" class="input" pt:placeholder="Email" />
-<!--                    <span class="highlight"></span><span class="bar"></span>-->
+                    <!--                    <span class="highlight"></span><span class="bar"></span>-->
                 </div>
                 <div class="group">
-                    <p:commandButton id="btnRec" value="Recuperar" actionListener="#{loginBean.doRecover}" update=":login-form:message" oncomplete="PF('recupera_senha_widget').hide()">
+                    <p:commandButton id="btnRec" value="Recuperar" update=":login-form:message" actionListener="#{loginBean.doRecover()}" oncomplete="PF('recupera_senha_widget').hide()">
+                        <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                    </p:commandButton>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </p:confirmDialog>
+                    <p:commandButton value="Já recebi o E-mail" update=":login-form:message" oncomplete="PF('recupera_senha_comcodigo_widget').show()"/>
+                </div>
+            </p:dialog>
+            <p:defaultCommand target="btnRec" />
+        </h:form>
+
+        <h:form id="reset-form-code" class="reset-form">
+            <p:growl id="message" showDetail="true" />
+            <p:dialog header="Recuperação com Código" widgetVar="recupera_senha_comcodigo_widget" id="recupera-senha-comcodigo-dialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closeOnEscape="true" class="reset-form">
+                <div class="group">
+                    <p:inputText size="20" maxlength="200" value="#{loginBean.loginRecuperaCodigo}" class="input" pt:placeholder="Usuário" />
+                </div>
+                <div class="group">
+                    <p:inputText size="20" maxlength="200" value="#{loginBean.emailRecuperaCodigo}" class="input" pt:placeholder="Email" />
+                </div>
+                <div class="group">
+                    <p:password size="20" maxlength="200" value="#{loginBean.novaSenhaRecuperaCodigo}" class="input" pt:placeholder="Nova Senha" />
+                </div>
+                <div class="group">
+                    <p:inputText size="20" maxlength="200" value="#{loginBean.codigorecuperacao}" class="input" pt:placeholder="Código" />
+                </div>
+                <div class="group">
+                    <p:commandButton value="Recuperar" update=":login-form:message" actionListener="#{loginBean.doRecoverCodigo()}" oncomplete="PF('recupera_senha_comcodigo_widget').hide()">
                         <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
                     </p:commandButton>
                     <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
@@ -58,8 +88,38 @@
                     </p:confirmDialog>
                 </div>
             </p:dialog>
-            <p:defaultCommand target="btnRec" />
         </h:form>
+
+        <h:form id="form-novo">
+            <p:dialog header="Cadastro" widgetVar="cadastro_widget" id="cadastro-dialog"
+                      resizable="false" modal="false" closeOnEscape="true">
+                <p:outputPanel style="text-align:center">
+                    <h:panelGrid  columns="2" columnClasses="label,value">
+                        <h:outputText value="Login" />
+                        <p:inputText size="20" maxlength="300" 
+                                     value="#{loginBean.novoUsuario.login}"/>
+
+                        <h:outputText value="Email" />
+                        <p:inputText size="20" maxlength="45" 
+                                     value="#{loginBean.novoUsuario.email}"/>
+
+                        <h:outputText value="Senha" />
+                        <p:password size="20" maxlength="45" 
+                                    value="#{loginBean.novoUsuario.senha}"/>
+                    </h:panelGrid>
+
+                    <p:commandButton value="Inserir" actionListener="#{loginBean.doCadastro()}" update=":login-form:message" oncomplete="PF('cadastro_widget').hide()" >
+                        <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                    </p:commandButton>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </p:confirmDialog>
+
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
         <footer><a href="http://portal.utfpr.edu.br/" target="_blank"><img src="resources/images/calendaricon.png"/></a>
             <p>2017 © <a href="http://portal.utfpr.edu.br/" target="_blank">UTFPR - Desenvolvimento Integrado de Sistemas</a>.</p>
         </footer>

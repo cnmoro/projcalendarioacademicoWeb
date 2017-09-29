@@ -18,11 +18,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "usuario")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u WHERE u.nivelacesso != 'Administrador'")
+      @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u WHERE u.nivelacesso != 'Administrador'")
     , @NamedQuery(name = "Usuario.findById", query = "SELECT u FROM Usuario u WHERE u.id = :id")
     , @NamedQuery(name = "Usuario.findByLogin", query = "SELECT u FROM Usuario u WHERE u.login = :login")
     , @NamedQuery(name = "Usuario.findBySenha", query = "SELECT u FROM Usuario u WHERE u.senha = :senha")
     , @NamedQuery(name = "Usuario.findByEmail", query = "SELECT u FROM Usuario u WHERE u.email = :email")
+    , @NamedQuery(name = "Usuario.findByLoginEmailCodigo", query = "SELECT u FROM Usuario u WHERE u.login = :login AND u.email = :email AND u.codigorecuperacao = :codigorecuperacao")
     , @NamedQuery(name = "Usuario.findByLoginSenha", query = "SELECT u FROM Usuario u WHERE u.login = :login AND u.senha = :senha")
     , @NamedQuery(name = "Usuario.findByLoginEmail", query = "SELECT u FROM Usuario u WHERE u.login = :login AND u.email = :email")
     , @NamedQuery(name = "Usuario.findByNivelacesso", query = "SELECT u FROM Usuario u WHERE u.nivelacesso > 6 AND u.nivelacesso < 10")})
@@ -56,6 +57,9 @@ public class Usuario implements Serializable {
     @Size(min = 1, max = 50)
     @Column(name = "nivelacesso")
     private String nivelacesso;
+    @Size(min = 1, max = 255)
+    @Column(name = "codigorecuperacao")
+    private String codigorecuperacao;
 
     public Usuario() {
     }
@@ -112,6 +116,14 @@ public class Usuario implements Serializable {
         this.nivelacesso = nivelacesso;
     }
 
+    public String getCodigorecuperacao() {
+        return codigorecuperacao;
+    }
+
+    public void setCodigorecuperacao(String codigorecuperacao) {
+        this.codigorecuperacao = codigorecuperacao;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -136,5 +148,5 @@ public class Usuario implements Serializable {
     public String toString() {
         return "calendarioacademico.commons.Usuario[ id=" + id + " ]";
     }
-    
+
 }
