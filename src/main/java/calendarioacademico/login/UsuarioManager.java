@@ -45,6 +45,7 @@ public class UsuarioManager implements Serializable {
     public void init() {
         nivelacesso = new HashMap<>();
         nivelacesso.put("Administrador", "Administrador");
+        nivelacesso.put("Colaborador Semana Acadêmica", "Colaborador Semana Acadêmica");
         nivelacesso.put("Usuário", "Usuário");
         atualizaUsuarios();
     }
@@ -55,10 +56,11 @@ public class UsuarioManager implements Serializable {
         this.tempUserSenha = u.getSenha();
         this.tempUserEmail = u.getEmail();
         this.tempUserNivelAcesso = u.getNivelacesso();
+        this.nivelacessoAux = u.getNivelacesso();
 
         if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.permitirExclusao = true;
-        } else if (u.getNivelacesso().equalsIgnoreCase("Usuário")) {
+        } else {
             this.permitirExclusao = false;
         }
     }
@@ -66,9 +68,6 @@ public class UsuarioManager implements Serializable {
     public void atualizaUsuarios() {
         if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.usuarios = EManager.getInstance().createNamedQuery("Usuario.findAll").getResultList();
-            this.desabilitarMudancaNivelAcesso = false;
-        } else if (LoginBean.getNivelAcesso().equalsIgnoreCase("Usuário")) {
-            this.usuarios = EManager.getInstance().createNamedQuery("Usuario.findByNivelacesso").getResultList();
             this.desabilitarMudancaNivelAcesso = false;
         } else {
             this.usuarios = EManager.getInstance().createNamedQuery("Usuario.findByLogin").setParameter("login", LoginBean.getUsernameStatic()).getResultList();
@@ -97,13 +96,12 @@ public class UsuarioManager implements Serializable {
 
             this.tempUserNivelAcesso = this.nivelacessoAux;
 
-            this.tempUserSenha = MD5Util.md5Hash(this.tempUserSenha);
+//            this.tempUserSenha = MD5Util.md5Hash(this.tempUserSenha);
             Usuario usuario = new Usuario(this.tempUserId, this.tempUserLogin, this.tempUserSenha, this.tempUserEmail, this.tempUserNivelAcesso);
 
             EManager.getInstance().getTransaction().begin();
             EManager.getInstance().merge(usuario);
             EManager.getInstance().getTransaction().commit();
-//                LogUtil.saveChangeLog("Modificou Usuário", usuario.getLogin());
             popupMessage_SucessoModifica();
         } else {
             popupMessage_ErroDados();
@@ -128,11 +126,7 @@ public class UsuarioManager implements Serializable {
         if (this.novoUsuario.getSenha().length() < 6) {
             popupMessage_ErroSenha();
         } else if (matcher.matches() && this.novoUsuario.getLogin().length() <= 60 && !this.nivelacessoAux.equalsIgnoreCase("Selecione")) {
-            if (this.nivelacessoAux.equalsIgnoreCase("Administrador")) {
-                this.novoUsuario.setNivelacesso("Administrador");
-            } else if (this.nivelacessoAux.equalsIgnoreCase("Usuário")) {
-                this.novoUsuario.setNivelacesso("Usuário");
-            }
+            this.novoUsuario.setNivelacesso(nivelacessoAux);
 
             this.novoUsuario.setSenha(MD5Util.md5Hash(this.novoUsuario.getSenha()));
             EManager.getInstance().getTransaction().begin();

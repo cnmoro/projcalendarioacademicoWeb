@@ -134,7 +134,7 @@
                             <p:inputText value="#{calendarioManager.novoEvento.horas}" />
 
                             <p:outputLabel value="Semana Acadêmica?" />
-                            <p:selectBooleanCheckbox value="#{calendarioManager.novoEvento.semanaacademica}" />
+                            <p:selectBooleanCheckbox value="#{calendarioManager.novoEvento.semanaacademica}" disabled="#{calendarioManager.colaboradorSemanaAcademica}"/>
 
                             <p:outputLabel value="Endereço" />
                             <p:inputText value="#{calendarioManager.novoEvento.endereco}" />

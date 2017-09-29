@@ -47,6 +47,8 @@ public class CalendarioManager implements Serializable {
 
     private boolean permiteAdicionar = true;
 
+    private boolean colaboradorSemanaAcademica = false;
+
     private String mapBounds = "-25.4322517, -49.2672195";
 
     private String dialogToShow = "dialogEventoModifica";
@@ -56,10 +58,17 @@ public class CalendarioManager implements Serializable {
         if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.permiteAdicionar = true;
             this.dialogToShow = "dialogEventoModifica";
+            this.colaboradorSemanaAcademica = false;
+        } else if (LoginBean.getNivelAcesso().equalsIgnoreCase("Colaborador Semana Acadêmica")) {
+            this.permiteAdicionar = true;
+            this.dialogToShow = "dialogEventoModifica";
+            this.colaboradorSemanaAcademica = true;
         } else {
             this.permiteAdicionar = false;
             this.dialogToShow = "dialogEventoVisualiza";
+            this.colaboradorSemanaAcademica = false;
         }
+
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
         atualizaEventos();
@@ -102,6 +111,9 @@ public class CalendarioManager implements Serializable {
         event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
         this.novoEvento.setDatainicio(event.getStartDate());
         this.novoEvento.setDatafim(event.getEndDate());
+        if (this.colaboradorSemanaAcademica = true) {
+            this.novoEvento.setSemanaacademica(true);
+        }
     }
 
     public void addEvento() {
@@ -242,6 +254,14 @@ public class CalendarioManager implements Serializable {
 
     public void setDialogToShow(String dialogToShow) {
         this.dialogToShow = dialogToShow;
+    }
+
+    public boolean isColaboradorSemanaAcademica() {
+        return colaboradorSemanaAcademica;
+    }
+
+    public void setColaboradorSemanaAcademica(boolean colaboradorSemanaAcademica) {
+        this.colaboradorSemanaAcademica = colaboradorSemanaAcademica;
     }
 
 }

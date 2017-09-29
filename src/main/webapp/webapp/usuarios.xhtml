@@ -27,14 +27,14 @@
                 <h:form id="tabela">
                     <br/>
                     <p:growl id="message" showDetail="true" />
-                    <p:dataTable id="tabela_usuarios" widgetVar="tabela_usuarios_widget" var="usuario" value="#{usuarioManager.usuarios}" rows="20" paginator="true" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                    <p:dataTable id="tabela_usuarios" widgetVar="tabela_usuarios_widget" style="width: 1100px" var="usuario" value="#{usuarioManager.usuarios}" rows="20" paginator="true" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                                  rowsPerPageTemplate="20,40,60">
                         <f:facet name="header" id="header_usuario" >
                             <div id="container">
                                 <div id="left">
                                     <p:commandButton value="Novo" icon="ui-icon-plusthick" disabled="#{usuarioManager.permiteMudancaNivelAcesso}"
                                                      process="@this" update=":form-novo:novo-usuario-dialog"
-                                                     oncomplete="PF('novo_usuario_widget').show()" style="float: left"/>
+                                                     oncomplete="PF('novo_usuario_widget').show()" style="float: left; height: 30px"/>
                                 </div>
                                 <div id="right"></div>
                                 <div id="center">
@@ -164,6 +164,7 @@
                     </p:dialog>
                     <p:defaultCommand target="btnAdd" />
                 </h:form>
+                <br/>
             </ui:define>
         </ui:composition>
     </body>
