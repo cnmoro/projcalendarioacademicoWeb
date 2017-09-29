@@ -1,6 +1,7 @@
 package calendarioacademico.servicos;
 
 import calendarioacademico.commons.Evento;
+import calendarioacademico.login.LoginBean;
 import calendarioacademico.utils.EManager;
 import java.io.IOException;
 import java.io.Serializable;
@@ -48,8 +49,17 @@ public class CalendarioManager implements Serializable {
 
     private String mapBounds = "-25.4322517, -49.2672195";
 
+    private String dialogToShow = "dialogEventoModifica";
+
     @PostConstruct
     public void init() {
+        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+            this.permiteAdicionar = true;
+            this.dialogToShow = "dialogEventoModifica";
+        } else {
+            this.permiteAdicionar = false;
+            this.dialogToShow = "dialogEventoVisualiza";
+        }
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
         atualizaEventos();
@@ -224,6 +234,14 @@ public class CalendarioManager implements Serializable {
 
     public void setMapBounds(String mapBounds) {
         this.mapBounds = mapBounds;
+    }
+
+    public String getDialogToShow() {
+        return dialogToShow;
+    }
+
+    public void setDialogToShow(String dialogToShow) {
+        this.dialogToShow = dialogToShow;
     }
 
 }

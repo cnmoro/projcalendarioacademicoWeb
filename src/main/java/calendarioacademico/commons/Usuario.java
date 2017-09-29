@@ -23,20 +23,19 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author moro
- */
 @Entity
 @Table(name = "usuario")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u")
+    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u WHERE u.nivelacesso != 10")
     , @NamedQuery(name = "Usuario.findById", query = "SELECT u FROM Usuario u WHERE u.id = :id")
     , @NamedQuery(name = "Usuario.findByLogin", query = "SELECT u FROM Usuario u WHERE u.login = :login")
-    , @NamedQuery(name = "Usuario.findByEmail", query = "SELECT u FROM Usuario u WHERE u.email = :email")
     , @NamedQuery(name = "Usuario.findBySenha", query = "SELECT u FROM Usuario u WHERE u.senha = :senha")
-    , @NamedQuery(name = "Usuario.findByNivelacesso", query = "SELECT u FROM Usuario u WHERE u.nivelacesso = :nivelacesso")})
+    , @NamedQuery(name = "Usuario.findByEmail", query = "SELECT u FROM Usuario u WHERE u.email = :email")
+    , @NamedQuery(name = "Usuario.findByLoginSenha", query = "SELECT u FROM Usuario u WHERE u.login = :login AND u.senha = :senha")
+    , @NamedQuery(name = "Usuario.findByLoginEmail", query = "SELECT u FROM Usuario u WHERE u.login = :login AND u.email = :email")
+    , @NamedQuery(name = "Usuario.findByNivelacesso", query = "SELECT u FROM Usuario u WHERE u.nivelacesso > 6 AND u.nivelacesso < 10")})
+
 public class Usuario implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -66,12 +65,6 @@ public class Usuario implements Serializable {
     @Size(min = 1, max = 50)
     @Column(name = "nivelacesso")
     private String nivelacesso;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idprofessor")
-    private Collection<Profatendimento> profatendimentoCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idusuario")
-    private Collection<Participacao> participacaoCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idusuario")
-    private Collection<Reuniaoprofessor> reuniaoprofessorCollection;
 
     public Usuario() {
     }
@@ -126,33 +119,6 @@ public class Usuario implements Serializable {
 
     public void setNivelacesso(String nivelacesso) {
         this.nivelacesso = nivelacesso;
-    }
-
-    @XmlTransient
-    public Collection<Profatendimento> getProfatendimentoCollection() {
-        return profatendimentoCollection;
-    }
-
-    public void setProfatendimentoCollection(Collection<Profatendimento> profatendimentoCollection) {
-        this.profatendimentoCollection = profatendimentoCollection;
-    }
-
-    @XmlTransient
-    public Collection<Participacao> getParticipacaoCollection() {
-        return participacaoCollection;
-    }
-
-    public void setParticipacaoCollection(Collection<Participacao> participacaoCollection) {
-        this.participacaoCollection = participacaoCollection;
-    }
-
-    @XmlTransient
-    public Collection<Reuniaoprofessor> getReuniaoprofessorCollection() {
-        return reuniaoprofessorCollection;
-    }
-
-    public void setReuniaoprofessorCollection(Collection<Reuniaoprofessor> reuniaoprofessorCollection) {
-        this.reuniaoprofessorCollection = reuniaoprofessorCollection;
     }
 
     @Override

@@ -22,11 +22,12 @@
         <ui:composition template="./template.xhtml">
             <ui:define name="content">
                 <h:form id="form-calendario">
+                    <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDIIV4YVva0Fx9HC5G5IB-4ydNZF-zusYs"/>
                     <p:growl id="mensagens" showDetail="true" />
 
-                    <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1000px" timeFormat="HH:mm" draggable="false">
+                    <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1100px" timeFormat="HH:mm" draggable="false" aspectRatio="2">
                         <p:ajax event="dateSelect" listener="#{calendarioManager.onDateSelect}" update=":form-calendario:detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
-                        <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica, :form-calendario:gmap" oncomplete="PF('dialogEventoModifica').show();" />
+                        <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica, :form-calendario:detalhesEventoVisualiza, :form-calendario:gmap-visualiza" oncomplete="PF('#{calendarioManager.dialogToShow}').show();" />
                     </p:schedule>
 
                     <br/>
@@ -196,20 +197,57 @@
                                 </p:column>
                             </p:selectOneMenu>
 
-                            <p:outputLabel value="Enviar arquivo do projeto" />
+                            <p:outputLabel value="Enviar arquivo do evento" />
                             <h:form id="form-upload-modifica" enctype="multipart/form-data">
                                 <h:outputText value="Selecione um arquivo PDF e clique em Enviar."/>
                                 <p:fileUpload fileUploadListener="#{calendarioManager.handleFileUpload}" update=":form-calendario:mensagens" uploadLabel="Enviar" label="Selecione" cancelLabel="Cancelar" mode="advanced" allowTypes="/(\.|\/)(pdf)$/" />
                             </h:form>
                         </h:panelGrid>
                         <br/>
-                        <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDIIV4YVva0Fx9HC5G5IB-4ydNZF-zusYs"></script>
-                        <p:gmap id="gmap" center="#{calendarioManager.mapBounds}" zoom="7"  type="MAP" 
-                                model="#{calendarioManager.mapModel}" style="width:100%;height:300px" widgetVar="map">
-                        </p:gmap>
-                        <br/>
                         <p:commandButton id="btModifica" value="Modificar" actionListener="#{calendarioManager.modificaEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens" />
                         <p:commandButton id="btExclui" value="Excluir" actionListener="#{calendarioManager.excluiEvento()}" oncomplete="PF('dialogEventoModifica').hide()" update=":form-calendario:calendario, :form-calendario:mensagens"/>
+                    </p:dialog> 
+
+                    <p:dialog widgetVar="dialogEventoVisualiza" header="Visualizar Evento" showEffect="clip" hideEffect="clip" resizable="false">
+                        <h:panelGrid id="detalhesEventoVisualiza" columns="2">
+                            <p:outputLabel value="Nome" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.nome}" disabled="true"/>
+
+                            <p:outputLabel value="Horas Complementares" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.horas}" disabled="true"/>
+
+                            <p:outputLabel value="Semana Acadêmica?" />
+                            <p:selectBooleanCheckbox value="#{calendarioManager.eventoSelecionado.semanaacademica}" disabled="true"/>
+
+                            <p:outputLabel value="Endereço" />
+                            <p:inputText value="#{calendarioManager.eventoSelecionado.endereco}" disabled="true"/>
+
+                            <p:outputLabel value="Data Início:" />
+                            <p:calendar value="#{calendarioManager.eventoSelecionado.datainicio}" pattern="MM/dd/yyyy HH:mm" disabled="true"/>
+
+                            <p:outputLabel value="Data Fim:" />
+                            <p:calendar value="#{calendarioManager.eventoSelecionado.datafim}" pattern="MM/dd/yyyy HH:mm" disabled="true"/>
+
+                            <p:outputLabel value="É Sub-evento de:"/>
+                            <p:selectOneMenu value="#{calendarioManager.eventoSelecionado.eventopai}" converter="eventoConverter" panelStyle="width:180px"
+                                             effect="fade" var="e" style="width:60px" filter="true" filterMatchMode="startsWith" disabled="true">
+                                <f:selectItem itemLabel="Nenhum" itemValue="" />
+                                <f:selectItems value="#{calendarioManager.eventos}" var="evento" itemLabel="#{evento.nome}" itemValue="#{evento}" />
+
+                                <p:column style="width:10%">
+                                    <h:outputText value="#{e.nome}" />
+                                </p:column>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="Ver arquivo do evento" />
+                            <p:commandButton value="Download" ajax="false" icon="ui-icon-arrowthick-1-s" disabled="#{projetoService.downloadHabilitado}">
+                                <p:fileDownload value="#{calendarioManager.eventoSelecionado.pdf}" />
+                            </p:commandButton>
+                        </h:panelGrid>
+                        <br/>
+                        <p:gmap id="gmap-visualiza" center="#{calendarioManager.mapBounds}" zoom="7"  type="MAP" 
+                                model="#{calendarioManager.mapModel}" style="width:100%;height:300px" widgetVar="map">
+                        </p:gmap>
                     </p:dialog> 
                 </h:form>
             </ui:define>

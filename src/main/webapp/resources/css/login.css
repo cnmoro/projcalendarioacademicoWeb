@@ -4,7 +4,6 @@ body {
     font-family: Helvetica;
     background: #eee;
     -webkit-font-smoothing: antialiased;
-    background-image: url("../images/utfpr.jpg");
 }
 
 hgroup { 
@@ -14,7 +13,7 @@ hgroup {
 
 h1, h3 { font-weight: 300; }
 
-h1 { color: white; }
+h1 { color: black; }
 
 h3 { color: #4a89dc; }
 
@@ -24,7 +23,7 @@ h3 { color: #4a89dc; }
     padding: 3em 2em 2em 2em;
     background: #fafafa;
     border: 1px solid #ebebeb;
-    box-shadow: rgba(0,0,0,0.14902) 0px 3px 3px 0px,rgba(0,0,0,0.09804) 0px 3px 3px 0px;
+    box-shadow: rgba(0,0,0,0.14902) 0px 3px 3px 3px,rgba(0,0,0,0.09804) 0px 3px 3px 0px;
 }
 
 .group { 
@@ -146,7 +145,7 @@ input:focus ~ .highlight {
 
     border: 0;
     border-radius: 2px;
-    border-bottom: 0px solid #a62116;
+    border-bottom: 0px solid #000000;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -156,24 +155,24 @@ input:focus ~ .highlight {
 /* Button modifiers */
 
 .buttonRed {
-    background: #200270;
-    text-shadow: 1px 1px 0 rgba(211, 39, 33, .5);
+    background: #e5be32;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, .5);
     box-shadow: rgba(0,0,0,0.14902) 0px 3px 3px 0px,rgba(0,0,0,0.09804) 0px 3px 3px 0px;
 }
 
-.buttonRed:hover { background: #0075D5; }
+.buttonRed:hover { background: #000000; }
 
 
 footer { text-align: center; }
 
 footer p {
-    color: #fdba9f;
+    color: #000000;
     font-size: 13px;
     letter-spacing: .4px;
 }
 
 footer a {
-    color: #fdba9f;
+    color: #000000;
     text-decoration: none;
     transition: all .2s ease;
 }

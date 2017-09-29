@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <style type="text/css">
+        #container {
+            height:auto;
+            min-height:30px;
+            height:auto !important;
+            height:30px;  
+        }
+        #center {
+            line-height: 30px;
+        }
+    </style>
+
+    <body>
+        <ui:composition template="./template.xhtml">
+            <ui:define name="content">
+                <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+                <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                    <h:graphicImage value="#{resource['images/loading.gif']}" />
+                </p:dialog>
+                <h:form id="tabela">
+                    <br/>
+                    <p:growl id="message" showDetail="true" />
+                    <p:dataTable id="tabela_usuarios" widgetVar="tabela_usuarios_widget" var="usuario" value="#{usuarioManager.usuarios}" rows="20" paginator="true" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowsPerPageTemplate="20,40,60">
+                        <f:facet name="header" id="header_usuario" >
+                            <div id="container">
+                                <div id="left">
+                                    <p:commandButton value="Novo" icon="ui-icon-plusthick" disabled="#{usuarioManager.permiteMudancaNivelAcesso}"
+                                                     process="@this" update=":form-novo:novo-usuario-dialog"
+                                                     oncomplete="PF('novo_usuario_widget').show()" style="float: left"/>
+                                </div>
+                                <div id="right"></div>
+                                <div id="center">
+                                    <p:outputLabel value="Usuários"/>
+                                </div>
+                            </div>
+                        </f:facet>
+                        <p:column filterBy="#{usuario.login}" style="text-align: center" headerText="Login" sortBy="#{usuario.login}">
+                            <h:outputText value="#{usuario.login}" />
+                        </p:column>
+                        <p:column filterBy="#{usuario.email}" style="text-align: center" headerText="Email" sortBy="#{usuario.email}">
+                            <h:outputText value="#{usuario.email}" />
+                        </p:column>
+                        <p:column style="width:40px;text-align: center">
+                            <p:commandButton update=":form-senha:modifica_senha_panel" oncomplete="PF('modifica_senha_widget').show()" icon="ui-icon-key"
+                                             title="View" action="#{usuarioManager.passa(usuario)}"/>
+                        </p:column>
+                        <p:column style="width:40px;text-align: center">
+                            <p:commandButton update=":form-modifica:modifica_usuario_panel" oncomplete="PF('modifica_usuario_widget').show()" icon="ui-icon-arrow-4-diag"
+                                             title="View" action="#{usuarioManager.passa(usuario)}"/>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+
+                <h:form id="form-senha">
+                    <p:dialog header="Modificar Senha" widgetVar="modifica_senha_widget" modal="false" showEffect="fade" hideEffect="fade" resizable="false" id="modifica-senha-dialog">
+                        <p:outputPanel id="modifica_senha_panel" style="text-align:center">
+
+                            <h:panelGrid  columns="2" columnClasses="label,value">
+                                <h:outputText value="Login" />
+                                <p:inputText size="20" maxlength="60" disabled="true"
+                                             value="#{usuarioManager.tempUserLogin}"/>
+
+                                <h:outputText value="Senha" />
+                                <p:password size="20" maxlength="60" 
+                                            value="#{usuarioManager.tempUserSenha}"/>
+                            </h:panelGrid>
+
+                            <br/>
+
+                            <p:commandButton value="Modificar" id="btnEdit" actionListener="#{usuarioManager.modificaSenha}" update=":tabela:message,:tabela:tabela_usuarios" oncomplete="PF('modifica_senha_widget').hide()" >
+                                <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                            </p:commandButton>
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                            </p:confirmDialog>
+                        </p:outputPanel>
+                    </p:dialog>
+                    <p:defaultCommand target="btnEdit" />
+                </h:form>
+
+                <h:form id="form-modifica">
+                    <p:dialog header="Modificar Usuário Selecionado" widgetVar="modifica_usuario_widget" modal="false" showEffect="fade" hideEffect="fade" resizable="false" id="modifica-usuario-dialog">
+                        <p:outputPanel id="modifica_usuario_panel" style="text-align:center">
+
+                            <h:panelGrid  columns="2" columnClasses="label,value">
+                                <h:outputText value="Login" />
+                                <p:inputText size="20" maxlength="60" 
+                                             value="#{usuarioManager.tempUserLogin}" disabled="true"/>
+
+                                <h:outputText value="Email" />
+                                <p:inputText size="20" maxlength="60" 
+                                             value="#{usuarioManager.tempUserEmail}"/>
+
+                                <h:outputText value="Nível de Acesso" />
+                                <p:selectOneMenu value="#{usuarioManager.nivelacessoAux}" style="width:180px" disabled="#{usuarioManager.permiteMudancaNivelAcesso}" >
+                                    <f:selectItem itemLabel="Selecione" itemValue="Selecione" noSelectionOption="true" />
+                                    <f:selectItems value="#{usuarioManager.nivelacesso}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+
+                            <br/>
+
+                            <p:commandButton value="Modificar" id="btnEdit" actionListener="#{usuarioManager.modificaUsuario}" update=":tabela:message,:tabela:tabela_usuarios" oncomplete="PF('modifica_usuario_widget').hide()" >
+                                <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                            </p:commandButton>
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                            </p:confirmDialog>
+                            <p:commandButton value="Excluir" rendered="#{usuarioManager.permitirExclusao}" actionListener="#{usuarioManager.deleteUsuario}" update=":tabela:message,:tabela:tabela_usuarios" oncomplete="PF('modifica_usuario_widget').hide()">
+                                <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                            </p:commandButton>
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                            </p:confirmDialog>
+                        </p:outputPanel>
+                    </p:dialog>
+                    <p:defaultCommand target="btnEdit" />
+                </h:form>
+
+                <h:form id="form-novo">
+                    <p:dialog header="Novo Usuário" widgetVar="novo_usuario_widget" id="novo-usuario-dialog"
+                              resizable="false" modal="false" closeOnEscape="true">
+                        <p:outputPanel style="text-align:center">
+                            <h:panelGrid  columns="2" columnClasses="label,value">
+                                <h:outputText value="Login" />
+                                <p:inputText size="20" maxlength="300" 
+                                             value="#{usuarioManager.novoUsuario.login}"/>
+
+                                <h:outputText value="Email" />
+                                <p:inputText size="20" maxlength="45" 
+                                             value="#{usuarioManager.novoUsuario.email}"/>
+
+                                <h:outputText value="Senha" />
+                                <p:password size="20" maxlength="45" 
+                                            value="#{usuarioManager.novoUsuario.senha}"/>
+
+                                <h:outputText value="Nível de Acesso" />
+                                <p:selectOneMenu value="#{usuarioManager.nivelacessoAux}" style="width:180px">
+                                    <f:selectItem itemLabel="Selecione" itemValue="Selecione" noSelectionOption="true" />
+                                    <f:selectItems value="#{usuarioManager.nivelacesso}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+
+                            <p:commandButton value="Inserir" actionListener="#{usuarioManager.inserirUsuario()}" update=":tabela:message,:tabela:tabela_usuarios" oncomplete="PF('novo_usuario_widget').hide()" id="btnAdd" >
+                                <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
+                            </p:commandButton>
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                                <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                                <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                            </p:confirmDialog>
+
+                        </p:outputPanel>
+                    </p:dialog>
+                    <p:defaultCommand target="btnAdd" />
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

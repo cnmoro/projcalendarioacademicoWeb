@@ -5,6 +5,7 @@
  */
 package calendarioacademico.commons;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +29,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 /**
  *
@@ -151,12 +154,13 @@ public class Evento implements Serializable {
     public void setSemanaacademica(boolean semanaacademica) {
         this.semanaacademica = semanaacademica;
     }
-    
+
     public String getSemanaacademicastring() {
-        if (semanaacademica)
+        if (semanaacademica) {
             return "Sim";
-        else
+        } else {
             return "Não";
+        }
     }
 
     public String getAutor() {
@@ -210,6 +214,15 @@ public class Evento implements Serializable {
     public byte[] getDocumento() {
         return documento;
     }
+
+    public StreamedContent getPdf() {
+        if (this.documento == null) {
+            return null;
+        } else {
+            return new DefaultStreamedContent(new ByteArrayInputStream(this.documento), "application/pdf", this.nome+".pdf");
+        }
+    }
+    
 
     public void setDocumento(byte[] documento) {
         this.documento = documento;
@@ -265,5 +278,5 @@ public class Evento implements Serializable {
     public String toString() {
         return this.nome;
     }
-    
+
 }

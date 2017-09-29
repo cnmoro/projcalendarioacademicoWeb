@@ -14,9 +14,6 @@
         #center {
             line-height: 30px;
         }
-        #left {
-            width: 500px;
-        }
     </style>
 
     <h:head>
@@ -28,21 +25,16 @@
 
         <div id="top">
             <ui:insert name="top">
-                <ui:include src="topFacelet.xhtml" />
+                <ui:include src="navbar.xhtml" />
             </ui:insert>
         </div>
-        <div>
-            <div id="left">
-                <ui:insert name="left">
-                    <ui:include src="leftFacelet.xhtml" />
-                </ui:insert>
-            </div>
-            <div id="right" class="left_content">
-                <ui:insert name="content">
-                    <ui:include src="index.xhtml" />
-                </ui:insert>
-            </div>
+
+        <div id="content" class="center_content" align="center">
+            <br/>
+            <ui:insert name="content">
+            </ui:insert>
         </div>
+
         <div id="bottom">
             <ui:insert name="bottom">
                 <ui:include src="bottomFacelet.xhtml" />
