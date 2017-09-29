@@ -19,6 +19,7 @@
             <p:menuitem value="Painel do Usuário" url="usuarios.xhtml" />
             <p:menuitem value="Agendamentos" />
             <p:menuitem value="Horas Contabilizadas" />
+            <p:menuitem value="Avisar Próximos Eventos" rendered="#{loginBean.admin}" action="#{calendarioManager.avisaEventos()}"/>
             <p:menuitem value="Logout" icon="ui-icon-close" action="#{loginBean.doLogout()}" />
             <f:facet name="options">
                 <p:commandButton class="label-usuario-logado" value="Logado como #{loginBean.username}" disabled="true" style="font-weight: bolder"/>

@@ -1,10 +1,12 @@
 package calendarioacademico.servicos;
 
 import calendarioacademico.commons.Evento;
+import calendarioacademico.commons.Usuario;
 import calendarioacademico.login.LoginBean;
 import calendarioacademico.utils.EManager;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -14,6 +16,10 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import org.primefaces.event.FileUploadEvent;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.mail.DefaultAuthenticator;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
@@ -33,6 +39,7 @@ import org.primefaces.model.map.Marker;
 public class CalendarioManager implements Serializable {
 
     public final static long DUAS_HORAS = 2 * 60 * 60 * 1000L;
+    public final static long UM_DIA = 24 * 60 * 60 * 1000L;
 
     private Evento novoEvento = new Evento();
     private Evento eventoSelecionado = new Evento();
@@ -118,7 +125,8 @@ public class CalendarioManager implements Serializable {
 
     public void addEvento() {
         this.novoEvento.setAutor("admin"); //Modificar apos construcao de opcao de login
-        //add geocoder
+        //TODO
+        //ADD GEOCODER
         EManager.getInstance().getTransaction().begin();
         EManager.getInstance().persist(this.novoEvento);
         EManager.getInstance().getTransaction().commit();
@@ -133,6 +141,8 @@ public class CalendarioManager implements Serializable {
             popupMessageDuasHoras();
         } else {
             this.eventoSelecionado.setAutor("admin");
+            //TODO
+            //ADD GEOCODER
             EManager.getInstance().getTransaction().begin();
             EManager.getInstance().merge(this.eventoSelecionado);
             EManager.getInstance().getTransaction().commit();
@@ -151,11 +161,63 @@ public class CalendarioManager implements Serializable {
         atualizaEventos();
     }
 
+    public void avisaEventos() throws EmailException {
+        try {
+            List<Usuario> usuarios = EManager.getInstance().createNamedQuery("Usuario.findByNivelacesso").getResultList();
+            List<String> emails = new ArrayList<>();
+
+            for (int i = 0; i < usuarios.size(); i++) {
+                emails.add(usuarios.get(i).getEmail());
+            }
+
+            Email email = new SimpleEmail();
+            email.setHostName("smtp.gmail.com");
+            email.setSmtpPort(587);
+            email.setAuthenticator(new DefaultAuthenticator("calendarioeventosbsi@gmail.com", "disciplinabsi"));
+            email.setTLS(true);
+            email.setFrom("calendarioeventosbsi@gmail.com");
+            email.setSubject("Calendário de Eventos - Aviso");
+
+            StringBuilder sbuilder = new StringBuilder();
+            sbuilder.append("Próximos eventos: ");
+            sbuilder.append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
+
+            Date horaAtual = new Date();
+            for (int i = 0; i < eventos.size(); i++) {
+                if (Math.abs(horaAtual.getTime() - eventos.get(i).getDatainicio().getTime()) <= UM_DIA) {
+                    sbuilder.append(eventos.get(i).getNome()).append(", ").append(eventos.get(i).getHoras()).append(" horas complementares.");
+                    sbuilder.append(System.getProperty("line.separator"));
+                }
+            }
+            sbuilder.append(System.getProperty("line.separator")).append("Saiba mais em nosso site.");
+
+            email.setMsg(sbuilder.toString());
+
+            for (int i = 0; i < emails.size(); i++) {
+                email.addTo(emails.get(i));
+            }
+
+            email.send();
+            popupMessageSucessoBatchMail();
+        } catch (Exception e) {
+            popupMessageErroBatchMail();
+        }
+
+    }
+
     public void addMessage(String summary, String detail) {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, detail);
         FacesContext.getCurrentInstance().addMessage(null, message);
     }
 
+    public void popupMessageSucessoBatchMail() {
+        addMessage("Sucesso", "Emails enviados.");
+    }
+    
+    public void popupMessageErroBatchMail() {
+        addMessage("Erro", "Problema ao enviar emails.");
+    }
+    
     public void popupMessageDocumentoUpload() {
         addMessage("Sucesso", "Documento carregado.");
     }

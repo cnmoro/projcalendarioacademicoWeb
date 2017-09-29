@@ -33,6 +33,7 @@ public class LoginBean implements Serializable {
     private String emailRecuperaCodigo = "";
     private String codigorecuperacao = "";
     private String novaSenhaRecuperaCodigo = "";
+    private boolean admin = false;
 
     private boolean loggedIn;
 
@@ -45,8 +46,12 @@ public class LoginBean implements Serializable {
         // Login sucesso
         if (users.size() > 0) {
             loggedIn = true;
-//            LogUtil.saveChangeLog("Fez login", users.get(0).getLogin());
             nivelAcesso = users.get(0).getNivelacesso();
+            if (nivelAcesso.equalsIgnoreCase("Administrador")) {
+                this.admin = true;
+            } else {
+                this.admin = false;
+            }
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             context.redirect(context.getRequestContextPath() + "/webapp/index.xhtml");
             return navigationBean.redirectToWelcome();
@@ -257,6 +262,14 @@ public class LoginBean implements Serializable {
 
     public void setNovaSenhaRecuperaCodigo(String novaSenhaRecuperaCodigo) {
         this.novaSenhaRecuperaCodigo = novaSenhaRecuperaCodigo;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
 }

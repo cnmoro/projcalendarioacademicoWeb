@@ -21,6 +21,10 @@
     <body>
         <ui:composition template="./template.xhtml">
             <ui:define name="content">
+                <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+                <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                    <h:graphicImage value="#{resource['images/loading2.gif']}" />
+                </p:dialog>
                 <h:form id="form-calendario">
                     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDIIV4YVva0Fx9HC5G5IB-4ydNZF-zusYs"/>
                     <p:growl id="mensagens" showDetail="true" />
