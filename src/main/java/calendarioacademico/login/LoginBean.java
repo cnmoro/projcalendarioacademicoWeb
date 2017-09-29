@@ -94,7 +94,7 @@ public class LoginBean implements Serializable {
         if (u != null) {
             String uuid = UUID.randomUUID().toString();
             sendMail(this.recuperaEmail, uuid);
-            u.setCodigorecuperacao(null);
+            u.setCodigorecuperacao(uuid);
             EManager.getInstance().getTransaction().begin();
             EManager.getInstance().merge(u);
             EManager.getInstance().getTransaction().commit();
@@ -110,7 +110,7 @@ public class LoginBean implements Serializable {
         recoverUser = (Usuario) EManager.getInstance().createNamedQuery("Usuario.findByLoginEmailCodigo").setParameter("login", this.loginRecuperaCodigo).setParameter("email", this.emailRecuperaCodigo).setParameter("codigorecuperacao", this.codigorecuperacao).getSingleResult();
         if (recoverUser.getId() != null) {
             recoverUser.setSenha(MD5Util.md5Hash(this.novaSenhaRecuperaCodigo));
-            recoverUser.setCodigorecuperacao("");
+            recoverUser.setCodigorecuperacao(null);
             EManager.getInstance().getTransaction().begin();
             EManager.getInstance().merge(recoverUser);
             EManager.getInstance().getTransaction().commit();
