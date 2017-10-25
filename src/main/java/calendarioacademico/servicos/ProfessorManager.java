@@ -26,7 +26,7 @@ import org.primefaces.model.map.DefaultMapModel;
  */
 @ManagedBean
 @ViewScoped
-public class ProfessorManager {
+public class ProfessorManager implements Serializable {
     private ScheduleModel eventModel;
     private ScheduleEvent event = new DefaultScheduleEvent();
     private boolean permiteAdicionar = true;
