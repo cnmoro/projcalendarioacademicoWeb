@@ -163,7 +163,7 @@ public class LoginBean implements Serializable {
     public static String getUsernameStatic() {
         return username;
     }
-
+    
     public String getUsername() {
         return this.username;
     }

@@ -28,7 +28,15 @@
                 <h:form id="form-calendario">
                     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDIIV4YVva0Fx9HC5G5IB-4ydNZF-zusYs"/>
                     <p:growl id="mensagens" showDetail="true" />
-
+                    
+                    <p:outputLabel value="Filtro por Autoria"/>
+                    <br/>
+                    <p:commandButton value="Semana Acadêmica" action="#{calendarioManager.refreshBySemanaAcademica()}" update=":form-calendario:calendario"/>
+                    <p:commandButton value="Universidade" action="#{calendarioManager.refreshByUniversidade()}" update=":form-calendario:calendario"/>
+                    <p:commandButton value="Professor" action="#{calendarioManager.refreshByProfessor()}" update=":form-calendario:calendario"/>
+                    <br/>
+                    <br/>
+                    
                     <p:schedule id="calendario" value="#{calendarioManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1100px" timeFormat="HH:mm" draggable="false" aspectRatio="2">
                         <p:ajax event="dateSelect" listener="#{calendarioManager.onDateSelect}" update=":form-calendario:detalhesEvento" oncomplete="PF('dialogEvento').show();" disabled="#{!calendarioManager.permiteAdicionar}"/>
                         <p:ajax event="eventSelect" listener="#{calendarioManager.onEventSelect}" update=":form-calendario:detalhesEventoModifica, :form-calendario:detalhesEventoVisualiza, :form-calendario:gmap-visualiza" oncomplete="PF('#{calendarioManager.dialogToShow}').show();" />
