@@ -22,6 +22,7 @@ import org.apache.commons.mail.SimpleEmail;
 @SessionScoped
 public class LoginBean implements Serializable {
 
+    private static Usuario usuarioAtual = new Usuario();
     private static String username;
     private String password;
     private String recuperaUsuario;
@@ -52,6 +53,7 @@ public class LoginBean implements Serializable {
             } else {
                 this.admin = false;
             }
+            this.usuarioAtual = users.get(0);
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             context.redirect(context.getRequestContextPath() + "/webapp/index.xhtml");
             return navigationBean.redirectToWelcome();
@@ -198,6 +200,10 @@ public class LoginBean implements Serializable {
 
     public static void setNivelAcesso(String nivelAcesso) {
         LoginBean.nivelAcesso = nivelAcesso;
+    }
+    
+    public static Usuario getUsuarioAtual() {
+        return usuarioAtual;
     }
 
     public String getRecuperaUsuario() {

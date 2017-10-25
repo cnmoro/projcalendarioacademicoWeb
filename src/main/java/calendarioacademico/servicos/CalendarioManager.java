@@ -1,6 +1,7 @@
 package calendarioacademico.servicos;
 
 import calendarioacademico.commons.Evento;
+import calendarioacademico.commons.Participacao;
 import calendarioacademico.commons.Usuario;
 import calendarioacademico.login.LoginBean;
 import calendarioacademico.utils.EManager;
@@ -154,6 +155,16 @@ public class CalendarioManager implements Serializable {
             this.novoEvento.setSemanaacademica(true);
         }
     }
+    
+    public void confirmaPresenca() {
+        Participacao p = new Participacao();
+        p.setIdevento(this.eventoSelecionado);
+        p.setIdusuario(LoginBean.getUsuarioAtual());
+        EManager.getInstance().getTransaction().begin();
+        EManager.getInstance().persist(p);
+        EManager.getInstance().getTransaction().commit();
+        popupMessageInscricao();
+    }
 
     public void addEvento() {
         this.novoEvento.setAutor(LoginBean.getNivelAcesso());
@@ -242,6 +253,10 @@ public class CalendarioManager implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null, message);
     }
 
+    public void popupMessageInscricao() {
+        addMessage("Sucesso", "Incrição confirmada.");
+    }
+    
     public void popupMessageSucessoBatchMail() {
         addMessage("Sucesso", "Emails enviados.");
     }
