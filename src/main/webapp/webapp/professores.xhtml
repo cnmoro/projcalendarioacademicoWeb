@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <style type="text/css">
+        #container {
+            height:auto;
+            min-height:30px;
+            height:auto !important;
+            height:30px;  
+        }
+        #center {
+            line-height: 30px;
+        }
+    </style>
+
+    <body>
+        <ui:composition template="./template.xhtml">
+            <ui:define name="content">
+                <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+                <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                    <h:graphicImage value="#{resource['images/loading2.gif']}" />
+                </p:dialog>
+                <h:form id="form-calendario">
+                    <p:growl id="mensagens" showDetail="true" />
+                    
+                    <p:schedule id="calendario" value="#{professorManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1100px" timeFormat="HH:mm" draggable="false" aspectRatio="2">
+                        <p:ajax event="dateSelect" listener="#{professorManager.onDateSelect}" oncomplete="PF('dialogEvento').show();" disabled="#{!professorManager.permiteAdicionar}"/>
+                        <p:ajax event="eventSelect" listener="#{professorManager.onEventSelect}" oncomplete="PF('#{professorManager.dialogToShow}').show();" />
+                    </p:schedule>
+
+                    <br/>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
