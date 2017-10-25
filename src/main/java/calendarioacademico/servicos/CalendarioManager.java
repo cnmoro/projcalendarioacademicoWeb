@@ -82,7 +82,39 @@ public class CalendarioManager implements Serializable {
     }
 
     public void atualizaEventos() {
+        this.eventModel = new DefaultScheduleModel();
+        this.mapModel = new DefaultMapModel();
         this.eventos = EManager.getInstance().createNamedQuery("Evento.findAll").getResultList();
+        this.eventModel.clear();
+        for (int i = 0; i < eventos.size(); i++) {
+            eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
+        }
+    }
+    
+    public void refreshBySemanaAcademica() {
+        this.eventModel = new DefaultScheduleModel();
+        this.mapModel = new DefaultMapModel();
+        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Colaborador Semana Acadêmica").getResultList();
+        this.eventModel.clear();
+        for (int i = 0; i < eventos.size(); i++) {
+            eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
+        }
+    }
+    
+    public void refreshByUniversidade() {
+        this.eventModel = new DefaultScheduleModel();
+        this.mapModel = new DefaultMapModel();
+        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Administrador").getResultList();
+        this.eventModel.clear();
+        for (int i = 0; i < eventos.size(); i++) {
+            eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
+        }
+    }
+    
+    public void refreshByProfessor() {
+        this.eventModel = new DefaultScheduleModel();
+        this.mapModel = new DefaultMapModel();
+        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Professor").getResultList();
         this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
@@ -124,7 +156,7 @@ public class CalendarioManager implements Serializable {
     }
 
     public void addEvento() {
-        this.novoEvento.setAutor("admin"); //Modificar apos construcao de opcao de login
+        this.novoEvento.setAutor(LoginBean.getNivelAcesso());
         //TODO
         //ADD GEOCODER
         EManager.getInstance().getTransaction().begin();
@@ -140,7 +172,7 @@ public class CalendarioManager implements Serializable {
         if (Math.abs(horaAtual.getTime() - this.eventoSelecionado.getDatafim().getTime()) < DUAS_HORAS) {
             popupMessageDuasHoras();
         } else {
-            this.eventoSelecionado.setAutor("admin");
+            this.eventoSelecionado.setAutor(LoginBean.getNivelAcesso());
             //TODO
             //ADD GEOCODER
             EManager.getInstance().getTransaction().begin();
