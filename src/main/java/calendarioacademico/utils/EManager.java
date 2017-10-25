@@ -20,6 +20,7 @@ public class EManager implements java.io.Serializable {
         if (em == null) {
             em = emf.createEntityManager();
         }
+        em.clear();
         return em;
     }
 
