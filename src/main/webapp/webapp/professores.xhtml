@@ -28,10 +28,14 @@
                 <h:form id="form-calendario">
                     <p:growl id="mensagens" showDetail="true" />
                     
-                    <p:schedule id="calendario" value="#{professorManager.eventModel}" widgetVar="calendario-widget" timeZone="GMT-3" style="width: 1100px" timeFormat="HH:mm" draggable="false" aspectRatio="2">
-                        <p:ajax event="dateSelect" listener="#{professorManager.onDateSelect}" oncomplete="PF('dialogEvento').show();" disabled="#{!professorManager.permiteAdicionar}"/>
-                        <p:ajax event="eventSelect" listener="#{professorManager.onEventSelect}" oncomplete="PF('#{professorManager.dialogToShow}').show();" />
-                    </p:schedule>
+                    <p:dataTable var="usuario" value="#{professorManager.professores}" style="width: 70%; text-align: center">
+                        <p:column headerText="Nome/Login">
+                            <h:outputText value="#{usuario.login}"/>
+                        </p:column>
+                        <p:column headerText="E-Mail">
+                            <h:outputText value="#{usuario.email}"/>
+                        </p:column>
+                    </p:dataTable>
 
                     <br/>
                 </h:form>
