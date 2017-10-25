@@ -47,6 +47,7 @@ public class UsuarioManager implements Serializable {
         nivelacesso.put("Administrador", "Administrador");
         nivelacesso.put("Colaborador Semana Acadêmica", "Colaborador Semana Acadêmica");
         nivelacesso.put("Usuário", "Usuário");
+        nivelacesso.put("Professor", "Professor");
         atualizaUsuarios();
     }
 
