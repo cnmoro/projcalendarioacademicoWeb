@@ -1,6 +1,7 @@
 package calendarioacademico.servicos;
 
 import calendarioacademico.commons.Evento;
+import calendarioacademico.commons.Loginscricao;
 import calendarioacademico.commons.Participacao;
 import calendarioacademico.commons.Usuario;
 import calendarioacademico.login.LoginBean;
@@ -158,10 +159,15 @@ public class CalendarioManager implements Serializable {
     
     public void confirmaPresenca() {
         Participacao p = new Participacao();
+        Loginscricao log = new Loginscricao();
         p.setIdevento(this.eventoSelecionado);
         p.setIdusuario(LoginBean.getUsuarioAtual());
+        log.setUsuario(LoginBean.getUsuarioAtual().getLogin());
+        log.setData(new Date());
+        log.setModificacao("Inscrito no evento '" + this.eventoSelecionado.getNome() + "'");
         EManager.getInstance().getTransaction().begin();
         EManager.getInstance().persist(p);
+        EManager.getInstance().persist(log);
         EManager.getInstance().getTransaction().commit();
         popupMessageInscricao();
     }
