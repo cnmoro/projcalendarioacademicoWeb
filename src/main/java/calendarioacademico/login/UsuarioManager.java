@@ -1,7 +1,5 @@
 package calendarioacademico.login;
 
-import calendarioacademico.commons.Usuario;
-import calendarioacademico.utils.EManager;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -14,6 +12,10 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import models.Usuario;
+import org.apache.commons.mail.Email;
+import utils.EManager;
+import utils.MD5Util;
 
 /**
  *
@@ -59,7 +61,7 @@ public class UsuarioManager implements Serializable {
         this.tempUserNivelAcesso = u.getNivelacesso();
         this.nivelacessoAux = u.getNivelacesso();
 
-        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+        if (LoginManager.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.permitirExclusao = true;
         } else {
             this.permitirExclusao = false;
@@ -67,11 +69,11 @@ public class UsuarioManager implements Serializable {
     }
 
     public void atualizaUsuarios() {
-        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
-            this.usuarios = EManager.getInstance().createNamedQuery("Usuario.findAll").getResultList();
+        if (LoginManager.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+            this.usuarios = EManager.getInstance().getDatabaseAccessor().getUsuarios();
             this.desabilitarMudancaNivelAcesso = false;
         } else {
-            this.usuarios = EManager.getInstance().createNamedQuery("Usuario.findByLogin").setParameter("login", LoginBean.getUsernameStatic()).getResultList();
+            this.usuarios = EManager.getInstance().getDatabaseAccessor().getUsuarioByLogin(LoginManager.getUsernameStatic());
             this.desabilitarMudancaNivelAcesso = true;
         }
     }
@@ -80,10 +82,7 @@ public class UsuarioManager implements Serializable {
         if ((!this.tempUserSenha.equalsIgnoreCase("")) && (this.tempUserSenha.length() >= 6)) {
             this.tempUserSenha = MD5Util.md5Hash(this.tempUserSenha);
             Usuario usuario = new Usuario(this.tempUserId, this.tempUserLogin, this.tempUserSenha, this.tempUserEmail, this.tempUserNivelAcesso);
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().merge(usuario);
-            EManager.getInstance().getTransaction().commit();
-//                LogUtil.saveChangeLog("Modificou Senha", usuario.getLogin());
+            EManager.getInstance().getDatabaseAccessor().updateUsuario(usuario);
             popupMessage_SucessoModificaSenha();
         } else {
             popupMessage_ErroSenha();
@@ -99,10 +98,7 @@ public class UsuarioManager implements Serializable {
 
 //            this.tempUserSenha = MD5Util.md5Hash(this.tempUserSenha);
             Usuario usuario = new Usuario(this.tempUserId, this.tempUserLogin, this.tempUserSenha, this.tempUserEmail, this.tempUserNivelAcesso);
-
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().merge(usuario);
-            EManager.getInstance().getTransaction().commit();
+            EManager.getInstance().getDatabaseAccessor().updateUsuario(usuario);
             popupMessage_SucessoModifica();
         } else {
             popupMessage_ErroDados();
@@ -112,10 +108,7 @@ public class UsuarioManager implements Serializable {
     }
 
     public void deleteUsuario() {
-        EManager.getInstance().getTransaction().begin();
-        EManager.getInstance().remove((Usuario) EManager.getInstance().createNamedQuery("Usuario.findById").setParameter("id", this.tempUserId).getSingleResult());
-        EManager.getInstance().getTransaction().commit();
-//            LogUtil.saveChangeLog("Excluiu Usuário", this.tempUserLogin);
+        EManager.getInstance().getDatabaseAccessor().removeUsuario(EManager.getInstance().getDatabaseAccessor().getUsuarioById(this.tempUserId));
         popupMessage_SucessoDeleta();
         this.nivelacessoAux = "";
         atualizaUsuarios();
@@ -128,12 +121,8 @@ public class UsuarioManager implements Serializable {
             popupMessage_ErroSenha();
         } else if (matcher.matches() && this.novoUsuario.getLogin().length() <= 60 && !this.nivelacessoAux.equalsIgnoreCase("Selecione")) {
             this.novoUsuario.setNivelacesso(nivelacessoAux);
-
             this.novoUsuario.setSenha(MD5Util.md5Hash(this.novoUsuario.getSenha()));
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().persist(this.novoUsuario);
-            EManager.getInstance().getTransaction().commit();
-//                LogUtil.saveChangeLog("Criou Usuário", this.novoUsuario.getLogin());
+            EManager.getInstance().getDatabaseAccessor().cadastraUsuario(this.novoUsuario);
             this.novoUsuario = new Usuario();
             popupMessage_SucessoInsert();
         } else {

@@ -19,10 +19,10 @@
             <p:menuitem value="Eventos"  url="eventos.xhtml" />
             <p:menuitem value="Professores"  url="professores.xhtml" />
             <p:menuitem value="Painel do Usuário" url="usuarios.xhtml" />
-            <p:menuitem value="Avisar Próximos Eventos" rendered="#{loginBean.admin}" action="#{calendarioManager.avisaEventos()}" update="mensagens"/>
-            <p:menuitem value="Logout" icon="ui-icon-close" action="#{loginBean.doLogout()}" />
+            <p:menuitem value="Avisar Próximos Eventos" rendered="#{loginManager.admin}" action="#{calendarioManager.avisaEventos()}" update="mensagens"/>
+            <p:menuitem value="Logout" icon="ui-icon-close" action="#{loginManager.doLogout()}" />
             <f:facet name="options">
-                <p:commandButton class="label-usuario-logado" value="Logado como #{loginBean.username}" disabled="true" style="font-weight: bolder"/>
+                <p:commandButton class="label-usuario-logado" value="Logado como #{loginManager.username}" disabled="true" style="font-weight: bolder"/>
             </f:facet>
         </p:megaMenu>
     </h:form>

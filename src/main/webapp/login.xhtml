@@ -26,14 +26,14 @@
         <h:form id="login-form" class="login-form">
             <p:growl id="message" showDetail="true" />
             <div class="group">
-                <h:inputText value="#{loginBean.username}" class="input" id="username" pt:placeholder="Usuário"/>
+                <h:inputText value="#{loginManager.username}" class="input" id="username" pt:placeholder="Usuário"/>
                 <span class="highlight"></span><span class="bar"></span>
             </div>
             <div class="group">
-                <h:inputSecret value="#{loginBean.password}" id="password" pt:placeholder="Senha"/>
+                <h:inputSecret value="#{loginManager.password}" id="password" pt:placeholder="Senha"/>
                 <span class="highlight"></span><span class="bar"></span>
             </div>
-            <p:commandButton id="button" class="button buttonRed" value="Entrar" action="#{loginBean.doLogin}" update="message"/>
+            <p:commandButton id="button" class="button buttonRed" value="Entrar" action="#{loginManager.doLogin}" update="message"/>
             <p:commandButton id="cadastrar" class="button buttonRed" value="Cadastrar" update=":form-novo:cadastro-dialog" oncomplete="PF('cadastro_widget').show()"/>
             <p:commandButton id="recsenha" class="button buttonRed" value="Recuperar Senha" update=":reset-form:recupera-senha-dialog" oncomplete="PF('recupera_senha_widget').show()"/>
         </h:form>
@@ -42,15 +42,15 @@
             <p:growl id="message" showDetail="true" />
             <p:dialog header="Recuperação de Senha" widgetVar="recupera_senha_widget" id="recupera-senha-dialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closeOnEscape="true" class="reset-form">
                 <div class="group">
-                    <p:inputText size="20" maxlength="200" value="#{loginBean.recuperaUsuario}" class="input" pt:placeholder="Usuário" />
+                    <p:inputText size="20" maxlength="200" value="#{loginManager.recuperaUsuario}" class="input" pt:placeholder="Usuário" />
                     <!--                    <span class="highlight"></span><span class="bar"></span>-->
                 </div>
                 <div class="group">
-                    <p:inputText size="20" maxlength="200" value="#{loginBean.recuperaEmail}" class="input" pt:placeholder="Email" />
+                    <p:inputText size="20" maxlength="200" value="#{loginManager.recuperaEmail}" class="input" pt:placeholder="Email" />
                     <!--                    <span class="highlight"></span><span class="bar"></span>-->
                 </div>
                 <div class="group">
-                    <p:commandButton id="btnRec" value="Recuperar" update=":login-form:message" actionListener="#{loginBean.doRecover()}" oncomplete="PF('recupera_senha_widget').hide()">
+                    <p:commandButton id="btnRec" value="Recuperar" update=":login-form:message" actionListener="#{loginManager.doRecover()}" oncomplete="PF('recupera_senha_widget').hide()">
                         <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
                     </p:commandButton>
                     <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
@@ -67,19 +67,19 @@
             <p:growl id="message" showDetail="true" />
             <p:dialog header="Recuperação com Código" widgetVar="recupera_senha_comcodigo_widget" id="recupera-senha-comcodigo-dialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closeOnEscape="true" class="reset-form">
                 <div class="group">
-                    <p:inputText size="20" maxlength="200" value="#{loginBean.loginRecuperaCodigo}" class="input" pt:placeholder="Usuário" />
+                    <p:inputText size="20" maxlength="200" value="#{loginManager.loginRecuperaCodigo}" class="input" pt:placeholder="Usuário" />
                 </div>
                 <div class="group">
-                    <p:inputText size="20" maxlength="200" value="#{loginBean.emailRecuperaCodigo}" class="input" pt:placeholder="Email" />
+                    <p:inputText size="20" maxlength="200" value="#{loginManager.emailRecuperaCodigo}" class="input" pt:placeholder="Email" />
                 </div>
                 <div class="group">
-                    <p:password size="20" maxlength="200" value="#{loginBean.novaSenhaRecuperaCodigo}" class="input" pt:placeholder="Nova Senha" />
+                    <p:password size="20" maxlength="200" value="#{loginManager.novaSenhaRecuperaCodigo}" class="input" pt:placeholder="Nova Senha" />
                 </div>
                 <div class="group">
-                    <p:inputText size="20" maxlength="200" value="#{loginBean.codigorecuperacao}" class="input" pt:placeholder="Código" />
+                    <p:inputText size="20" maxlength="200" value="#{loginManager.codigorecuperacao}" class="input" pt:placeholder="Código" />
                 </div>
                 <div class="group">
-                    <p:commandButton value="Recuperar" update=":login-form:message" actionListener="#{loginBean.doRecoverCodigo()}" oncomplete="PF('recupera_senha_comcodigo_widget').hide()">
+                    <p:commandButton value="Recuperar" update=":login-form:message" actionListener="#{loginManager.doRecoverCodigo()}" oncomplete="PF('recupera_senha_comcodigo_widget').hide()">
                         <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
                     </p:commandButton>
                     <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
@@ -97,18 +97,18 @@
                     <h:panelGrid  columns="2" columnClasses="label,value">
                         <h:outputText value="Login" />
                         <p:inputText size="20" maxlength="300" 
-                                     value="#{loginBean.novoUsuario.login}"/>
+                                     value="#{loginManager.novoUsuario.login}"/>
 
                         <h:outputText value="Email" />
                         <p:inputText size="20" maxlength="45" 
-                                     value="#{loginBean.novoUsuario.email}"/>
+                                     value="#{loginManager.novoUsuario.email}"/>
 
                         <h:outputText value="Senha" />
                         <p:password size="20" maxlength="45" 
-                                    value="#{loginBean.novoUsuario.senha}"/>
+                                    value="#{loginManager.novoUsuario.senha}"/>
                     </h:panelGrid>
 
-                    <p:commandButton value="Inserir" actionListener="#{loginBean.doCadastro()}" update=":login-form:message" oncomplete="PF('cadastro_widget').hide()" >
+                    <p:commandButton value="Inserir" actionListener="#{loginManager.doCadastro()}" update=":login-form:message" oncomplete="PF('cadastro_widget').hide()" >
                         <p:confirm header="Confirmação" message="Tem certeza?" icon="ui-icon-alert"  />
                     </p:commandButton>
                     <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">

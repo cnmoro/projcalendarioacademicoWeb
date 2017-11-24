@@ -1,26 +1,24 @@
 package calendarioacademico.login;
 
-import calendarioacademico.commons.Usuario;
-import calendarioacademico.utils.EManager;
 import java.io.IOException;
 import java.io.Serializable;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import java.util.List;
 import javax.faces.context.ExternalContext;
 import java.util.UUID;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
+import javax.faces.bean.ManagedProperty;
+import models.Usuario;
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
+import utils.EManager;
+import utils.MD5Util;
 
 @ManagedBean
 @SessionScoped
-public class LoginBean implements Serializable {
+public class LoginManager implements Serializable {
 
     private static Usuario usuarioAtual = new Usuario();
     private static String username;
@@ -37,15 +35,16 @@ public class LoginBean implements Serializable {
     private boolean admin = false;
 
     private boolean loggedIn;
-
+    
     @ManagedProperty(value = "#{navigationBean}")
     private NavigationBean navigationBean;
 
     public String doLogin() throws IOException {
-        List<Usuario> users = EManager.getInstance().createNamedQuery("Usuario.findByLoginSenha", Usuario.class).setParameter("login", username).setParameter("senha", MD5Util.md5Hash(password)).getResultList();
+        List<Usuario> users = EManager.getInstance().getDatabaseAccessor().getUsuariosByLoginSenha(username, password);
 
         // Login sucesso
         if (users.size() > 0) {
+            System.out.println("Login sucesso.");
             loggedIn = true;
             nivelAcesso = users.get(0).getNivelacesso();
             if (nivelAcesso.equalsIgnoreCase("Administrador")) {
@@ -54,12 +53,14 @@ public class LoginBean implements Serializable {
                 this.admin = false;
             }
             this.usuarioAtual = users.get(0);
+            System.out.println("Logado como: " + this.usuarioAtual.getLogin());
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             context.redirect(context.getRequestContextPath() + "/webapp/index.xhtml");
             return navigationBean.redirectToWelcome();
+        } else {
+            popupMessage_DadosIncorretos();
+            return navigationBean.toLogin();
         }
-        popupMessage_DadosIncorretos();
-        return navigationBean.toLogin();
     }
 
     public void doCadastro() {
@@ -69,9 +70,7 @@ public class LoginBean implements Serializable {
                 popupMessage_DadosIncorretos();
             } else {
                 this.novoUsuario.setSenha(MD5Util.md5Hash(this.novoUsuario.getSenha()));
-                EManager.getInstance().getTransaction().begin();
-                EManager.getInstance().persist(this.novoUsuario);
-                EManager.getInstance().getTransaction().commit();
+                EManager.getInstance().getDatabaseAccessor().cadastraUsuario(this.novoUsuario);
                 popupMessage_CadastroSucesso();
             }
         } catch (Exception e) {
@@ -94,17 +93,16 @@ public class LoginBean implements Serializable {
     public void doRecover() throws EmailException {
         Usuario u = null;
         try {
-            u = (Usuario) EManager.getInstance().createNamedQuery("Usuario.findByLoginEmail", Usuario.class).setParameter("login", this.recuperaUsuario).setParameter("email", this.recuperaEmail).getSingleResult();
+            u = EManager.getInstance().getDatabaseAccessor().getUsuarioByLoginEmail(this.recuperaUsuario, this.recuperaEmail);
         } catch (Exception e) {
             System.out.println("Usuário não encontrado.");
         }
         if (u != null) {
             String uuid = UUID.randomUUID().toString();
-            sendMail(this.recuperaEmail, uuid);
+            EManager.getInstance().getEnviaEmailAccessor().enviaEmailRecuperacao(this.recuperaEmail, uuid);
+            popupMessage_EmailEnviado();
             u.setCodigorecuperacao(uuid);
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().merge(u);
-            EManager.getInstance().getTransaction().commit();
+            EManager.getInstance().getDatabaseAccessor().updateUsuario(u);
         } else {
             popupMessage_DadosIncorretos();
         }
@@ -114,31 +112,15 @@ public class LoginBean implements Serializable {
 
     public void doRecoverCodigo() {
         Usuario recoverUser = new Usuario();
-        recoverUser = (Usuario) EManager.getInstance().createNamedQuery("Usuario.findByLoginEmailCodigo").setParameter("login", this.loginRecuperaCodigo).setParameter("email", this.emailRecuperaCodigo).setParameter("codigorecuperacao", this.codigorecuperacao).getSingleResult();
+        recoverUser = EManager.getInstance().getDatabaseAccessor().getUsuarioByLoginEmailCodigo(this.loginRecuperaCodigo, this.emailRecuperaCodigo, this.codigorecuperacao);
         if (recoverUser.getId() != null) {
             recoverUser.setSenha(MD5Util.md5Hash(this.novaSenhaRecuperaCodigo));
             recoverUser.setCodigorecuperacao(null);
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().merge(recoverUser);
-            EManager.getInstance().getTransaction().commit();
+            EManager.getInstance().getDatabaseAccessor().updateUsuario(recoverUser);
             popupMessage_ResetSenhaSucesso();
         } else {
             popupMessage_DadosIncorretos();
         }
-    }
-
-    private void sendMail(String destino, String uuid) throws EmailException {
-        Email email = new SimpleEmail();
-        email.setHostName("smtp.gmail.com");
-        email.setSmtpPort(587);
-        email.setAuthenticator(new DefaultAuthenticator("calendarioeventosbsi@gmail.com", "disciplinabsi"));
-        email.setTLS(true);
-        email.setFrom("calendarioeventosbsi@gmail.com");
-        email.setSubject("Calendário de Eventos - Recuperação de senha");
-        email.setMsg("Seu código é: " + uuid);
-        email.addTo(destino);
-        email.send();
-        popupMessage_EmailEnviado();
     }
 
     public void addMessage(String summary, String detail) {
@@ -190,16 +172,12 @@ public class LoginBean implements Serializable {
         this.loggedIn = loggedIn;
     }
 
-    public void setNavigationBean(NavigationBean navigationBean) {
-        this.navigationBean = navigationBean;
-    }
-
     public static String getNivelAcesso() {
         return nivelAcesso;
     }
 
     public static void setNivelAcesso(String nivelAcesso) {
-        LoginBean.nivelAcesso = nivelAcesso;
+        LoginManager.nivelAcesso = nivelAcesso;
     }
     
     public static Usuario getUsuarioAtual() {
@@ -278,4 +256,11 @@ public class LoginBean implements Serializable {
         this.admin = admin;
     }
 
+    public NavigationBean getNavigationBean() {
+        return navigationBean;
+    }
+
+    public void setNavigationBean(NavigationBean navigationBean) {
+        this.navigationBean = navigationBean;
+    }
 }
