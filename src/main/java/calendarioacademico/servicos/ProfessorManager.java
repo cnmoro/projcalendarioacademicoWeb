@@ -1,12 +1,12 @@
 package calendarioacademico.servicos;
 
-import calendarioacademico.commons.Usuario;
-import calendarioacademico.utils.EManager;
 import java.io.Serializable;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import models.Usuario;
+import utils.EManager;
 
 /**
  *
@@ -19,7 +19,7 @@ public class ProfessorManager implements Serializable {
     
     @PostConstruct
     public void init() {
-        this.professores = EManager.getInstance().createNamedQuery("Usuario.findProfessores").getResultList();
+        this.professores = EManager.getInstance().getDatabaseAccessor().getProfessores();
     }
 
     public List<Usuario> getProfessores() {

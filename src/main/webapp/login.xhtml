@@ -33,7 +33,7 @@
                 <h:inputSecret value="#{loginBean.password}" id="password" pt:placeholder="Senha"/>
                 <span class="highlight"></span><span class="bar"></span>
             </div>
-            <p:commandButton id="button" class="button buttonRed" value="Entrar" action="#{loginBean.doLogin}" update="message"/>
+            <p:commandButton id="button" class="button buttonRed" value="Entrar" action="#{loginBean.doLogin}" update="message" ajax="false"/>
             <p:commandButton id="cadastrar" class="button buttonRed" value="Cadastrar" update=":form-novo:cadastro-dialog" oncomplete="PF('cadastro_widget').show()"/>
             <p:commandButton id="recsenha" class="button buttonRed" value="Recuperar Senha" update=":reset-form:recupera-senha-dialog" oncomplete="PF('recupera_senha_widget').show()"/>
         </h:form>

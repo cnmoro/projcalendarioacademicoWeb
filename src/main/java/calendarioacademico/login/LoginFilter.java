@@ -1,6 +1,5 @@
 package calendarioacademico.login;
 
-import calendarioacademico.login.LoginBean;
 import java.io.IOException;
 
 import javax.servlet.Filter;

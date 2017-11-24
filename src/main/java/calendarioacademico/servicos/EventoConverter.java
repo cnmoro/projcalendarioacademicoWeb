@@ -1,9 +1,10 @@
-package calendarioacademico.commons;
+package calendarioacademico.servicos;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import models.Evento;
 
 @FacesConverter(value = "eventoConverter")
 public class EventoConverter implements Converter {

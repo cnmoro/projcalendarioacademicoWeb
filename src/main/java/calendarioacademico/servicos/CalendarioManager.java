@@ -1,14 +1,8 @@
 package calendarioacademico.servicos;
 
-import calendarioacademico.commons.Evento;
-import calendarioacademico.commons.Loginscricao;
-import calendarioacademico.commons.Participacao;
-import calendarioacademico.commons.Usuario;
 import calendarioacademico.login.LoginBean;
-import calendarioacademico.utils.EManager;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -16,12 +10,11 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import models.Evento;
+import models.Loginscricao;
+import models.Participacao;
 import org.primefaces.event.FileUploadEvent;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
@@ -31,6 +24,8 @@ import org.primefaces.model.map.DefaultMapModel;
 import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
 import org.primefaces.model.map.Marker;
+import utils.EManager;
+import models.EventoConverter;
 
 /**
  *
@@ -39,9 +34,10 @@ import org.primefaces.model.map.Marker;
 @ManagedBean
 @ViewScoped
 public class CalendarioManager implements Serializable {
-
-    public final static long DUAS_HORAS = 2 * 60 * 60 * 1000L;
-    public final static long UM_DIA = 24 * 60 * 60 * 1000L;
+    
+    public long DUAS_HORAS = 2 * 60 * 60 * 1000L;
+    public long DOIS_DIAS = 48 * 60 * 60 * 1000L;
+    public long UM_DIA = 24 * 60 * 60 * 1000L;
 
     private Evento novoEvento = new Evento();
     private Evento eventoSelecionado = new Evento();
@@ -86,7 +82,7 @@ public class CalendarioManager implements Serializable {
     public void atualizaEventos() {
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
-        this.eventos = EManager.getInstance().createNamedQuery("Evento.findAll").getResultList();
+        this.eventos = EManager.getInstance().getDatabaseAccessor().getEventos();
         this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
@@ -96,7 +92,7 @@ public class CalendarioManager implements Serializable {
     public void refreshBySemanaAcademica() {
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
-        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Colaborador Semana Acadêmica").getResultList();
+        this.eventos = EManager.getInstance().getDatabaseAccessor().getEventosByAutor("Colaborador Semana Acadêmica");
         this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
@@ -106,7 +102,7 @@ public class CalendarioManager implements Serializable {
     public void refreshByUniversidade() {
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
-        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Administrador").getResultList();
+        this.eventos = EManager.getInstance().getDatabaseAccessor().getEventosByAutor("Administrador");
         this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
@@ -116,7 +112,7 @@ public class CalendarioManager implements Serializable {
     public void refreshByProfessor() {
         this.eventModel = new DefaultScheduleModel();
         this.mapModel = new DefaultMapModel();
-        this.eventos = EManager.getInstance().createNamedQuery("Evento.findByAutor").setParameter("autor", "Professor").getResultList();
+        this.eventos = EManager.getInstance().getDatabaseAccessor().getEventosByAutor("Professor");
         this.eventModel.clear();
         for (int i = 0; i < eventos.size(); i++) {
             eventModel.addEvent(new DefaultScheduleEvent(eventos.get(i).getNome(), eventos.get(i).getDatainicio(), eventos.get(i).getDatafim(), eventos.get(i)));
@@ -152,7 +148,7 @@ public class CalendarioManager implements Serializable {
         event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
         this.novoEvento.setDatainicio(event.getStartDate());
         this.novoEvento.setDatafim(event.getEndDate());
-        if (this.colaboradorSemanaAcademica = true) {
+        if (this.colaboradorSemanaAcademica == true) {
             this.novoEvento.setSemanaacademica(true);
         }
     }
@@ -165,10 +161,8 @@ public class CalendarioManager implements Serializable {
         log.setUsuario(LoginBean.getUsuarioAtual().getLogin());
         log.setData(new Date());
         log.setModificacao("Inscrito no evento '" + this.eventoSelecionado.getNome() + "'");
-        EManager.getInstance().getTransaction().begin();
-        EManager.getInstance().persist(p);
-        EManager.getInstance().persist(log);
-        EManager.getInstance().getTransaction().commit();
+        EManager.getInstance().getDatabaseAccessor().cadastraParticipacao(p);
+        EManager.getInstance().getDatabaseAccessor().cadastraLogInscricao(log);
         popupMessageInscricao();
     }
 
@@ -176,9 +170,7 @@ public class CalendarioManager implements Serializable {
         this.novoEvento.setAutor(LoginBean.getNivelAcesso());
         //TODO
         //ADD GEOCODER
-        EManager.getInstance().getTransaction().begin();
-        EManager.getInstance().persist(this.novoEvento);
-        EManager.getInstance().getTransaction().commit();
+        EManager.getInstance().getDatabaseAccessor().cadastraEvento(this.novoEvento);
         this.novoEvento = new Evento();
         popupMessageCadastrado();
         atualizaEventos();
@@ -192,9 +184,7 @@ public class CalendarioManager implements Serializable {
             this.eventoSelecionado.setAutor(LoginBean.getNivelAcesso());
             //TODO
             //ADD GEOCODER
-            EManager.getInstance().getTransaction().begin();
-            EManager.getInstance().merge(this.eventoSelecionado);
-            EManager.getInstance().getTransaction().commit();
+            EManager.getInstance().getDatabaseAccessor().updateEvento(this.eventoSelecionado);
             this.eventoSelecionado = new Evento();
             popupMessageModificado();
             atualizaEventos();
@@ -202,56 +192,14 @@ public class CalendarioManager implements Serializable {
     }
 
     public void excluiEvento() {
-        EManager.getInstance().getTransaction().begin();
-        EManager.getInstance().remove(this.eventoSelecionado);
-        EManager.getInstance().getTransaction().commit();
+        EManager.getInstance().getDatabaseAccessor().removeEvento(this.eventoSelecionado);
         this.eventoSelecionado = new Evento();
         popupMessageExcluido();
         atualizaEventos();
     }
 
-    public void avisaEventos() throws EmailException {
-        try {
-            List<Usuario> usuarios = EManager.getInstance().createNamedQuery("Usuario.findByNivelacesso").getResultList();
-            List<String> emails = new ArrayList<>();
-
-            for (int i = 0; i < usuarios.size(); i++) {
-                emails.add(usuarios.get(i).getEmail());
-            }
-
-            Email email = new SimpleEmail();
-            email.setHostName("smtp.gmail.com");
-            email.setSmtpPort(587);
-            email.setAuthenticator(new DefaultAuthenticator("calendarioeventosbsi@gmail.com", "disciplinabsi"));
-            email.setTLS(true);
-            email.setFrom("calendarioeventosbsi@gmail.com");
-            email.setSubject("Calendário de Eventos - Aviso");
-
-            StringBuilder sbuilder = new StringBuilder();
-            sbuilder.append("Próximos eventos: ");
-            sbuilder.append(System.getProperty("line.separator")).append(System.getProperty("line.separator"));
-
-            Date horaAtual = new Date();
-            for (int i = 0; i < eventos.size(); i++) {
-                if (Math.abs(horaAtual.getTime() - eventos.get(i).getDatainicio().getTime()) <= UM_DIA) {
-                    sbuilder.append(eventos.get(i).getNome()).append(", ").append(eventos.get(i).getHoras()).append(" horas complementares.");
-                    sbuilder.append(System.getProperty("line.separator"));
-                }
-            }
-            sbuilder.append(System.getProperty("line.separator")).append("Saiba mais em nosso site.");
-
-            email.setMsg(sbuilder.toString());
-
-            for (int i = 0; i < emails.size(); i++) {
-                email.addTo(emails.get(i));
-            }
-
-            email.send();
-            popupMessageSucessoBatchMail();
-        } catch (Exception e) {
-            popupMessageErroBatchMail();
-        }
-
+    public void avisaEventos() {
+        EManager.getInstance().getEnviaEmailAccessor().emailAvisaEventos(eventos);
     }
 
     public void addMessage(String summary, String detail) {
