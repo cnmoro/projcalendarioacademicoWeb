@@ -168,8 +168,9 @@ public class CalendarioManager implements Serializable {
 
     public void addEvento() {
         this.novoEvento.setAutor(LoginBean.getNivelAcesso());
-        //TODO
-        //ADD GEOCODER
+        LatLng coord = GoogleRequest.getLatLng(this.novoEvento.getEndereco());
+        this.novoEvento.setLat(coord.getLat());
+        this.novoEvento.setLon(coord.getLng());
         EManager.getInstance().getDatabaseAccessor().cadastraEvento(this.novoEvento);
         this.novoEvento = new Evento();
         popupMessageCadastrado();
@@ -182,8 +183,9 @@ public class CalendarioManager implements Serializable {
             popupMessageDuasHoras();
         } else {
             this.eventoSelecionado.setAutor(LoginBean.getNivelAcesso());
-            //TODO
-            //ADD GEOCODER
+            LatLng coord = GoogleRequest.getLatLng(this.eventoSelecionado.getEndereco());
+            this.eventoSelecionado.setLat(coord.getLat());
+            this.eventoSelecionado.setLon(coord.getLng());
             EManager.getInstance().getDatabaseAccessor().updateEvento(this.eventoSelecionado);
             this.eventoSelecionado = new Evento();
             popupMessageModificado();
