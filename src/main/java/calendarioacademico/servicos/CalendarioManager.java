@@ -1,6 +1,6 @@
 package calendarioacademico.servicos;
 
-import calendarioacademico.login.LoginManager;
+import calendarioacademico.login.LoginBean;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
@@ -25,6 +25,7 @@ import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
 import org.primefaces.model.map.Marker;
 import utils.EManager;
+import models.EventoConverter;
 
 /**
  *
@@ -59,11 +60,11 @@ public class CalendarioManager implements Serializable {
 
     @PostConstruct
     public void init() {
-        if (LoginManager.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.permiteAdicionar = true;
             this.dialogToShow = "dialogEventoModifica";
             this.colaboradorSemanaAcademica = false;
-        } else if (LoginManager.getNivelAcesso().equalsIgnoreCase("Colaborador Semana Acadêmica")) {
+        } else if (LoginBean.getNivelAcesso().equalsIgnoreCase("Colaborador Semana Acadêmica")) {
             this.permiteAdicionar = true;
             this.dialogToShow = "dialogEventoModifica";
             this.colaboradorSemanaAcademica = true;
@@ -147,7 +148,7 @@ public class CalendarioManager implements Serializable {
         event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
         this.novoEvento.setDatainicio(event.getStartDate());
         this.novoEvento.setDatafim(event.getEndDate());
-        if (this.colaboradorSemanaAcademica = true) {
+        if (this.colaboradorSemanaAcademica == true) {
             this.novoEvento.setSemanaacademica(true);
         }
     }
@@ -156,8 +157,8 @@ public class CalendarioManager implements Serializable {
         Participacao p = new Participacao();
         Loginscricao log = new Loginscricao();
         p.setIdevento(this.eventoSelecionado);
-        p.setIdusuario(LoginManager.getUsuarioAtual());
-        log.setUsuario(LoginManager.getUsuarioAtual().getLogin());
+        p.setIdusuario(LoginBean.getUsuarioAtual());
+        log.setUsuario(LoginBean.getUsuarioAtual().getLogin());
         log.setData(new Date());
         log.setModificacao("Inscrito no evento '" + this.eventoSelecionado.getNome() + "'");
         EManager.getInstance().getDatabaseAccessor().cadastraParticipacao(p);
@@ -166,7 +167,7 @@ public class CalendarioManager implements Serializable {
     }
 
     public void addEvento() {
-        this.novoEvento.setAutor(LoginManager.getNivelAcesso());
+        this.novoEvento.setAutor(LoginBean.getNivelAcesso());
         //TODO
         //ADD GEOCODER
         EManager.getInstance().getDatabaseAccessor().cadastraEvento(this.novoEvento);
@@ -180,7 +181,7 @@ public class CalendarioManager implements Serializable {
         if (Math.abs(horaAtual.getTime() - this.eventoSelecionado.getDatafim().getTime()) < DUAS_HORAS) {
             popupMessageDuasHoras();
         } else {
-            this.eventoSelecionado.setAutor(LoginManager.getNivelAcesso());
+            this.eventoSelecionado.setAutor(LoginBean.getNivelAcesso());
             //TODO
             //ADD GEOCODER
             EManager.getInstance().getDatabaseAccessor().updateEvento(this.eventoSelecionado);

@@ -61,7 +61,7 @@ public class UsuarioManager implements Serializable {
         this.tempUserNivelAcesso = u.getNivelacesso();
         this.nivelacessoAux = u.getNivelacesso();
 
-        if (LoginManager.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.permitirExclusao = true;
         } else {
             this.permitirExclusao = false;
@@ -69,11 +69,11 @@ public class UsuarioManager implements Serializable {
     }
 
     public void atualizaUsuarios() {
-        if (LoginManager.getNivelAcesso().equalsIgnoreCase("Administrador")) {
+        if (LoginBean.getNivelAcesso().equalsIgnoreCase("Administrador")) {
             this.usuarios = EManager.getInstance().getDatabaseAccessor().getUsuarios();
             this.desabilitarMudancaNivelAcesso = false;
         } else {
-            this.usuarios = EManager.getInstance().getDatabaseAccessor().getUsuarioByLogin(LoginManager.getUsernameStatic());
+            this.usuarios = EManager.getInstance().getDatabaseAccessor().getUsuarioByLogin(LoginBean.getUsernameStatic());
             this.desabilitarMudancaNivelAcesso = true;
         }
     }

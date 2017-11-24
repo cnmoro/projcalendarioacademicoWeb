@@ -5,12 +5,12 @@ import java.io.Serializable;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import java.util.List;
 import javax.faces.context.ExternalContext;
 import java.util.UUID;
-import javax.faces.bean.ManagedProperty;
 import models.Usuario;
 import org.apache.commons.mail.EmailException;
 import utils.EManager;
@@ -18,7 +18,7 @@ import utils.MD5Util;
 
 @ManagedBean
 @SessionScoped
-public class LoginManager implements Serializable {
+public class LoginBean implements Serializable {
 
     private static Usuario usuarioAtual = new Usuario();
     private static String username;
@@ -39,7 +39,7 @@ public class LoginManager implements Serializable {
     @ManagedProperty(value = "#{navigationBean}")
     private NavigationBean navigationBean;
 
-    public String doLogin() throws IOException {
+    public void doLogin() throws IOException {
         List<Usuario> users = EManager.getInstance().getDatabaseAccessor().getUsuariosByLoginSenha(username, password);
 
         // Login sucesso
@@ -55,11 +55,9 @@ public class LoginManager implements Serializable {
             this.usuarioAtual = users.get(0);
             System.out.println("Logado como: " + this.usuarioAtual.getLogin());
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-            context.redirect(context.getRequestContextPath() + "/webapp/index.xhtml");
-            return navigationBean.redirectToWelcome();
+            context.redirect(context.getRequestContextPath() + "/webapp/index.xhtml?faces-redirect=true");
         } else {
             popupMessage_DadosIncorretos();
-            return navigationBean.toLogin();
         }
     }
 
@@ -177,7 +175,7 @@ public class LoginManager implements Serializable {
     }
 
     public static void setNivelAcesso(String nivelAcesso) {
-        LoginManager.nivelAcesso = nivelAcesso;
+        LoginBean.nivelAcesso = nivelAcesso;
     }
     
     public static Usuario getUsuarioAtual() {

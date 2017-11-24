@@ -1,6 +1,5 @@
 package calendarioacademico.login;
 
-import calendarioacademico.login.LoginManager;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -16,7 +15,7 @@ public class LoginFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         
-        LoginManager loginBean = (LoginManager) ((HttpServletRequest) request).getSession().getAttribute("loginBean");
+        LoginBean loginBean = (LoginBean) ((HttpServletRequest) request).getSession().getAttribute("loginBean");
 
         HttpServletRequest req = (HttpServletRequest) request;
 
